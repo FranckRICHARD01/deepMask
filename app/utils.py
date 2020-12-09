@@ -3,6 +3,90 @@ from sklearn.utils import class_weight
 import matplotlib.cm as cm
 from scipy import ndimage
 
+
+def inference(args, loader, model, t2w_fname, nifti=False):
+    src = args.inference
+    dst = args.outdir+'/'+args.model
+
+    model.eval()
+    # nvols = reduce(operator.mul, target_split, 1)
+    # assume single GPU / batch size 1
+    for sample in loader:
+        start_time = time.time()
+
+        data, case_id, t1w_fname = sample['image'], sample['id'], sample['filename']
+
+        _, header, affine, out_shape = get_nii_hdr_affine(t1w_fname[0]) # load original input with header and affine
+
+        shape = data.size()
+        # convert names to batch tensor
+        if args.cuda:
+            data.pin_memory()
+            data = data.cuda().float()
+        else:
+            data = data.float()
+        data = Variable(data, volatile=True)
+        output = model(data)
+        # _, output = output.max(1)
+        output = torch.argmax(output, dim=1)
+        output = output.view(shape[2:])
+        output = output.cpu()
+        output = output.data.numpy()
+
+        print("save {}".format(case_id[0]))
+        if not os.path.exists(os.path.join(dst)):
+            os.makedirs(os.path.join(dst), exist_ok=True)
+
+        if nifti:
+            affine = header.get_qform()
+            output = skt.resize(output, output_shape=out_shape, order=1, mode='wrap', preserve_range=1, anti_aliasing=True)
+            # output = np.where(output>0.5, 1, 0).astype(np.int_)
+            nii_out = nib.Nifti1Image(output, affine, header)
+            # nii_out = resample(in_img=nii_out, out_class=nii_self_template)
+            nii_out.to_filename(os.path.join(dst, case_id[0]+"_vnet_maskpred.nii.gz"))
+
+        elapsed_time = time.time() - start_time
+        print("=> inference time: {} seconds".format(round(elapsed_time,2)))
+        print("=*80")
+
+    config = './app/densecrf/config_densecrf.txt'
+    # t2w_fname = re.sub('T1', 'FLAIR', t1w_fname[0])
+    print(t1w_fname[0], t2w_fname[0])
+    start_time = time.time()
+    denseCRF(case_id[0], t1w_fname[0], t2w_fname, out_shape, config, dst, dst, os.path.join(dst, case_id[0]+"_vnet_maskpred.nii.gz"))
+    elapsed_time = time.time() - start_time
+    print("=*80")
+    print("=> dense 3D-CRF inference time: {} seconds".format(round(elapsed_time,2)))
+    print("=*80")
+
+
+def datestr():
+    now = time.gmtime()
+    return '{}{:02}{:02}_{:02}{:02}'.format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min)
+
+
+def find_replace_re(config_tmp, find_str, replace_str):
+    with fileinput.FileInput(config_tmp, inplace=True, backup='.bak') as file:
+        for line in file:
+            print(re.sub(find_str, str(replace_str), line.rstrip(), flags=re.MULTILINE), end='\n')
+
+
+def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
+    X, Y, Z = input_shape
+    config_tmp = "/tmp/" + id + "_config_densecrf.txt"
+    print(config_tmp)
+    subprocess.call(["cp", "-f", config, config_tmp])
+    # find and replace placeholder with actual filenames
+    find_str = ["<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>", "<OUTDIR_PLACEHOLDER>", "<PRED_LABELS_PLACEHOLDER>", "<X_PLACEHOLDER>", "<Y_PLACEHOLDER>", "<Z_PLACEHOLDER>"]
+    replace_str = [str(id), str(t1), str(t2), str(out_dir), str(pred_labels), str(X), str(Y), str(Z)]
+    # config_tmp_replicate = [x for x in [config_tmp] for _ in range(len(find_str))]
+    # [print(a,b,c) for a,b,c in zip(config_tmp_replicate, find_str, replace_str)]
+    # starmap(find_replace_re, zip(config_tmp_replicate, find_str, replace_str))
+    for fs, rs in zip(find_str, replace_str):
+        find_replace_re(config_tmp, fs, rs)
+    subprocess.call(["./app/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+
+
 def compute_weights(labels, binary=False):
 	if binary:
 		labels = (labels > 0).astype(np.int_)
@@ -11,7 +95,6 @@ def compute_weights(labels, binary=False):
 	# if labels.ndim > 3:
 	# 	weights  = np.array(weights.mean(axis=0))
 	return weights
-
 
 
 def dice_subfields(image, label, label_num, empty_score=1.0):
