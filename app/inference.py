@@ -3,7 +3,7 @@
 # source activate torch3
 # deepMask-run_postCIVET.py ${id} ${id}_t1_final.nii.gz ${id}_flair_final.nii.gz /host/silius/local_raid/ravnoor/01_Projects/06_DeepLesion_LoSo/data/final /host/silius/local_raid/ravnoor/01_Projects/06_DeepLesion_LoSo/data/deepMasks
 
-import os, math, sys, time, fileinput, re
+import os, math, sys, time
 
 import subprocess
 # from subprocess import Popen, PIPE
@@ -18,8 +18,8 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-from mo_dots import wrap, Data
-import shutil, setproctitle
+from mo_dots import Data
+import setproctitle
 from functools import reduce
 import operator
 from itertools import starmap
