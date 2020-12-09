@@ -77,8 +77,16 @@ def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
     print(config_tmp)
     subprocess.call(["cp", "-f", config, config_tmp])
     # find and replace placeholder with actual filenames
-    find_str = ["<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>", "<OUTDIR_PLACEHOLDER>", "<PRED_LABELS_PLACEHOLDER>", "<X_PLACEHOLDER>", "<Y_PLACEHOLDER>", "<Z_PLACEHOLDER>"]
-    replace_str = [str(id), str(t1), str(t2), str(out_dir), str(pred_labels), str(X), str(Y), str(Z)]
+    find_str = [
+                "<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>",
+                "<OUTDIR_PLACEHOLDER>", "<PRED_LABELS_PLACEHOLDER>",
+                "<X_PLACEHOLDER>", "<Y_PLACEHOLDER>", "<Z_PLACEHOLDER>"
+                ]
+    replace_str = [
+                    str(id), str(t1), str(t2),
+                    str(out_dir), str(pred_labels),
+                    str(X), str(Y), str(Z)
+                    ]
     # config_tmp_replicate = [x for x in [config_tmp] for _ in range(len(find_str))]
     # [print(a,b,c) for a,b,c in zip(config_tmp_replicate, find_str, replace_str)]
     # starmap(find_replace_re, zip(config_tmp_replicate, find_str, replace_str))
@@ -166,7 +174,6 @@ def get_nii_hdr_affine(t1w_fname):
     header = load_nii(t1w_fname).header
     affine = header.get_qform()
     return nifti, header, affine, shape
-
 
 
 def plotslice(i, image, label, ax, fig, x, y, z, alfa=0.5, binarize=False, mask=False):
