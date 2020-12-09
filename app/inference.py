@@ -40,11 +40,10 @@ args.ngpu = 1
 
 args.evaluate = ''
 
-args.modeldir = './app/models/'
 args.outdir = './app/outputs/'
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
-args.inference = args.modeldir + '/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
+args.inference = './app/models/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
 
 args.seed = 1
 args.opt = 'adam'
