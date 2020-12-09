@@ -8,8 +8,6 @@ import os, math, sys, time, fileinput, re
 import subprocess
 from subprocess import Popen, PIPE
 
-from base_deepMask import *
-
 import torch
 
 import numpy as np
@@ -26,8 +24,6 @@ from torch.utils.data import DataLoader
 
 import shutil, setproctitle
 
-import vnet
-# import make_graph
 from functools import reduce
 import operator
 from itertools import starmap
@@ -39,6 +35,9 @@ from mo_dots import wrap, Data
 import pandas as pd
 from skimage import transform as skt
 from sklearn import metrics
+
+from base_deepMask import *
+import vnet
 
 
 def datestr():
@@ -91,7 +90,7 @@ def inference(args, loader, model, t2w_fname, nifti=False):
         print("=> inference time: {} seconds".format(round(elapsed_time,2)))
         print("=*80")
 
-    config='/host/hamlet/local_raid/data/ravnoor/01_Projects/12_deepMask/src/noel_CIVET_masker/config_densecrf.txt'
+    config='./app/densecrf/config_densecrf.txt'
     # t2w_fname = re.sub('T1', 'FLAIR', t1w_fname[0])
     print(t1w_fname[0], t2w_fname[0])
     start_time = time.time()
@@ -104,7 +103,7 @@ def inference(args, loader, model, t2w_fname, nifti=False):
 
 def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
     X, Y, Z = input_shape
-    config_tmp = "/tmp/"+id+"_config_densecrf.txt"
+    config_tmp = "/tmp/" + id + "_config_densecrf.txt"
     print(config_tmp)
     subprocess.call(["cp", "-f", config, config_tmp])
     find_str = ["<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>", "<OUTDIR_PLACEHOLDER>", "<PRED_LABELS_PLACEHOLDER>", "<X_PLACEHOLDER>", "<Y_PLACEHOLDER>", "<Z_PLACEHOLDER>"]
@@ -114,7 +113,7 @@ def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
     # starmap(find_replace_re, zip(config_tmp_replicate, find_str, replace_str))
     for fs, rs in zip(find_str, replace_str):
         find_replace_re(config_tmp, fs, rs)
-    subprocess.call(["/host/hamlet/local_raid/data/ravnoor/01_Projects/12_deepMask/src/densecrf/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+    subprocess.call(["./app/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
 
 
 def find_replace_re(config_tmp, find_str, replace_str):
@@ -122,28 +121,27 @@ def find_replace_re(config_tmp, find_str, replace_str):
         for line in file:
             print(re.sub(find_str, str(replace_str), line.rstrip(), flags=re.MULTILINE), end='\n')
 
-args=Data()
-args.batchSz=3
-args.ngpu=1
+args = Data()
+args.batchSz = 3
+args.ngpu = 1
 
-args.evaluate=''
+args.evaluate = ''
 
-args.modeldir = '/host/hamlet/local_raid/data/ravnoor/01_Projects/12_deepMask/src/work/'
+args.modeldir = './app/models/'
 args.outdir = sys.argv[5]
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
-args.model='vnet.masker.20180316_0441' # training, N=153
-args.inference=args.modeldir+args.model+'/vnet_masker_model_best.pth.tar'
+args.inference = args.modeldir + '/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
 
-args.seed=1
-args.opt='adam'
-args.nEpochs=100
+args.seed = 1
+args.opt = 'adam'
+args.nEpochs = 100
 
 args.cuda = torch.cuda.is_available()
 print(args.cuda)
 # args.cuda = False
 
-setproctitle.setproctitle(args.model+'_'+sys.argv[1])
+setproctitle.setproctitle(args.model + '_' + sys.argv[1])
 
 torch.manual_seed(args.seed)
 
@@ -157,7 +155,7 @@ else:
 
 start_time = time.time()
 model = vnet.VNet(n_filters=6, outChans=2, elu=True, nll=True)
-batch_size = args.ngpu*args.batchSz
+batch_size = args.ngpu * args.batchSz
 gpu_ids = range(args.ngpu)
 
 if args.cuda:
