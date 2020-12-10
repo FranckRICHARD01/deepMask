@@ -6,7 +6,7 @@ from scipy import ndimage
 
 def inference(args, loader, model, t2w_fname, nifti=False):
     src = args.inference
-    dst = args.outdir+'/'+args.model
+    dst = args.outdir+'/'
 
     model.eval()
     # nvols = reduce(operator.mul, target_split, 1)
@@ -49,7 +49,7 @@ def inference(args, loader, model, t2w_fname, nifti=False):
         print("=> inference time: {} seconds".format(round(elapsed_time,2)))
         print("=*80")
 
-    config = './app/densecrf/config_densecrf.txt'
+    config = '/app/densecrf/config_densecrf.txt'
     # t2w_fname = re.sub('T1', 'FLAIR', t1w_fname[0])
     print(t1w_fname[0], t2w_fname[0])
     start_time = time.time()
@@ -92,7 +92,7 @@ def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
     # starmap(find_replace_re, zip(config_tmp_replicate, find_str, replace_str))
     for fs, rs in zip(find_str, replace_str):
         find_replace_re(config_tmp, fs, rs)
-    subprocess.call(["./app/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+    subprocess.call(["/app/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
 
 
 def compute_weights(labels, binary=False):
