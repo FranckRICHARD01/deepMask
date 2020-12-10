@@ -1,9 +1,9 @@
-FROM pytorch/pytorch:1.3-cuda10.1-cudnn7-runtime
+FROM docker.bic.mni.mcgill.ca/pytorch-cuda:1.7-cu101
 
 RUN conda update conda
 
-WORKDIR /workspace
+WORKDIR /app
 RUN chmod -R a+w .
 
-COPY app/* /workspace/app
-CMD ["python", "./app/converter.py"]
+COPY app/* /app
+CMD ["python3", "main.py"]
