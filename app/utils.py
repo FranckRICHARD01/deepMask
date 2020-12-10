@@ -1,8 +1,16 @@
-import re, fileinput
+import os
+import re
+import fileinput
+import time
+import subprocess
 from sklearn.utils import class_weight
 import matplotlib.cm as cm
 from scipy import ndimage
-
+import nibabel as nib
+from nibabel import load as load_nii
+from torch.autograd import Variable
+from torch import argmax
+from skimage import transform as skt
 
 def inference(args, loader, model, t2w_fname, nifti=False):
     src = args.inference
@@ -28,7 +36,7 @@ def inference(args, loader, model, t2w_fname, nifti=False):
         data = Variable(data, volatile=True)
         output = model(data)
         # _, output = output.max(1)
-        output = torch.argmax(output, dim=1)
+        output = argmax(output, dim=1)
         output = output.view(shape[2:])
         output = output.cpu()
         output = output.data.numpy()
@@ -49,7 +57,7 @@ def inference(args, loader, model, t2w_fname, nifti=False):
         print("=> inference time: {} seconds".format(round(elapsed_time,2)))
         print("=*80")
 
-    config = '/app/densecrf/config_densecrf.txt'
+    config = '/app/dense3dCrf/config_densecrf.txt'
     # t2w_fname = re.sub('T1', 'FLAIR', t1w_fname[0])
     print(t1w_fname[0], t2w_fname[0])
     start_time = time.time()

@@ -15,9 +15,11 @@ RUN mkdir /app
 WORKDIR /app
 
 # Create a non-root user and switch to it
+RUN sudo addgroup --gid 618 noel
 RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
- && chown -R user:user /app
+ && chown -R user:noel /app
 RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-user
+RUN adduser user noel
 USER user
 
 # All users can use /home/user as their home directory

@@ -1,7 +1,6 @@
 matplotlib
 mo-dots
 nibabel
-numpy
 scikit-image
 scikit-learn
 scipy

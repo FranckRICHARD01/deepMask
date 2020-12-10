@@ -5,16 +5,13 @@
 
 import os, math, sys, time
 
-import subprocess
-# from subprocess import Popen, PIPE
-
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.init as init
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.autograd import Variable
+
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
@@ -26,7 +23,6 @@ from itertools import starmap
 
 import nibabel as nib
 from nibabel.processing import resample_to_output as resample
-from skimage import transform as skt
 from sklearn import metrics
 
 from base import *
@@ -43,6 +39,7 @@ args.evaluate = ''
 args.outdir = '/app/outputs/'
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
+args.model = 'vnet.masker.20180316_0441'
 args.inference = '/app/models/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
 
 args.seed = 1
@@ -57,7 +54,7 @@ print(args.cuda)
 # args.cuda = False
 
 # set process title for htop/nvidia-smi/ytop monitoring
-setproctitle.setproctitle(args.model + '_' + sys.argv[1])
+setproctitle.setproctitle(args.model + '_' + str(sys.argv[1]))
 
 torch.manual_seed(args.seed)
 
@@ -73,7 +70,7 @@ batch_size = args.ngpu * args.batchSz
 gpu_ids = range(args.ngpu)
 
 if args.cuda:
-    model = nn.parallel.DataParallel(model, device_ids=gpu_ids)
+    model = nn.parallel.DataParallel(model, device_ids = gpu_ids)
 
 if os.path.isfile(args.inference):
     print("=> loading checkpoint '{}'".format(args.inference))
@@ -95,11 +92,11 @@ if args.cuda:
     print('moving the model to GPU')
     model = model.cuda()
 
-inferenceSet = InferMaskDataset(id=sys.argv[1],
-                                t1=sys.argv[2],
-                               flair=sys.argv[3],
-                               root_dir=sys.argv[4],
-                               transform=transforms.Compose([ inferResize(resize), ToTensorInfer() ])
+inferenceSet = InferMaskDataset(
+                                id = sys.argv[1],
+                                t1 = sys.argv[2], flair = sys.argv[3],
+                                root_dir = sys.argv[4],
+                                transform = transforms.Compose([ inferResize(resize), ToTensorInfer() ])
                                )
 
 kwargs = {'num_workers': 1} if args.cuda else {}
