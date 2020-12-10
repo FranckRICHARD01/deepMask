@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
-
 # Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -73,7 +72,7 @@ class InferMaskDataset(Dataset):
         t2w_fname = os.path.join(self.root_dir, self.t2)
         case_id = self.id
 
-        t1w, t2w = load_nii(t1w_fname).get_data(), load_nii(t2w_fname).get_data()
+        t1w, t2w = load_nii(t1w_fname).get_fdata(), load_nii(t2w_fname).get_fdata()
         t1w = (t1w.astype(dtype=np.float32) - t1w[np.nonzero(t1w)].mean()) / t1w[np.nonzero(t1w)].std()
         t2w = (t2w.astype(dtype=np.float32) - t2w[np.nonzero(t2w)].mean()) / t2w[np.nonzero(t2w)].std()
 

@@ -1,0 +1,10 @@
+matplotlib
+mo-dots
+nibabel
+numpy
+scikit-image
+scikit-learn
+scipy
+seaborn
+setproctitle
+torchsummary
