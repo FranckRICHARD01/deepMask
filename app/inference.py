@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-
-# source activate torch3
-# deepMask-run_postCIVET.py ${id} ${id}_t1_final.nii.gz ${id}_flair_final.nii.gz /host/silius/local_raid/ravnoor/01_Projects/06_DeepLesion_LoSo/data/final /host/silius/local_raid/ravnoor/01_Projects/06_DeepLesion_LoSo/data/deepMasks
+"""
+usage:
+inference.py ${id} ${id}_t1.nii.gz ${id}_flair.nii.gz ${IN_DIR} ${OUT_DIR}
+"""
 
 import os, math, sys, time
 
@@ -17,9 +18,7 @@ import torchvision.transforms as transforms
 
 from mo_dots import Data
 import setproctitle
-from functools import reduce
 import operator
-from itertools import starmap
 
 import nibabel as nib
 from nibabel.processing import resample_to_output as resample
