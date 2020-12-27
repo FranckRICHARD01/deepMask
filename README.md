@@ -2,8 +2,8 @@
 
 **USAGE:**
 ```
-docker run -it -v /tmp:/outputs deepmask /app/inference.py \
+docker run -it -v /tmp:/tmp deepmask /app/inference.py \
                                                 $PATIENT_ID \
-                                                /outputs/T1.nii.gz /outputs/FLAIR.nii.gz
-                                                /outputs
+                                                /tmp/T1.nii.gz /tmp/FLAIR.nii.gz
+                                                /tmp
 ```
