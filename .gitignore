@@ -1,3 +1,4 @@
+.gitignore
 examples/
 *.nii
 *.nii.gz

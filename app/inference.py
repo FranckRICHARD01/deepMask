@@ -37,7 +37,7 @@ args.outdir = '/tmp'
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
 args.model = 'vnet.masker.20180316_0441'
-args.inference = '/app/models/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
+args.inference = '/app/weights/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
 
 args.seed = 1
 args.opt = 'adam'
