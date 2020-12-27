@@ -14,7 +14,7 @@ from skimage import transform as skt
 
 def inference(args, loader, model, t2w_fname, nifti=False):
     src = args.inference
-    dst = args.outdir+'/'
+    dst = args.outdir
 
     model.eval()
     # nvols = reduce(operator.mul, target_split, 1)
@@ -48,24 +48,22 @@ def inference(args, loader, model, t2w_fname, nifti=False):
         if nifti:
             affine = header.get_qform()
             output = skt.resize(output, output_shape=out_shape, order=1, mode='wrap', preserve_range=1, anti_aliasing=True)
-            # output = np.where(output>0.5, 1, 0).astype(np.int_)
             nii_out = nib.Nifti1Image(output, affine, header)
-            # nii_out = resample(in_img=nii_out, out_class=nii_self_template)
             nii_out.to_filename(os.path.join(dst, case_id[0]+"_vnet_maskpred.nii.gz"))
 
         elapsed_time = time.time() - start_time
+        print("======")
         print("=> inference time: {} seconds".format(round(elapsed_time,2)))
-        print("=*80")
+        print("======")
 
     config = '/app/dense3dCrf/config_densecrf.txt'
-    # t2w_fname = re.sub('T1', 'FLAIR', t1w_fname[0])
-    print(t1w_fname[0], t2w_fname[0])
+
     start_time = time.time()
-    denseCRF(case_id[0], t1w_fname[0], t2w_fname, out_shape, config, dst, dst, os.path.join(dst, case_id[0]+"_vnet_maskpred.nii.gz"))
+    denseCRF(case_id[0], t1w_fname[0], t2w_fname, out_shape, config, dst, os.path.join(dst, case_id[0]+"_vnet_maskpred.nii.gz"))
     elapsed_time = time.time() - start_time
-    print("=*80")
+    print("======")
     print("=> dense 3D-CRF inference time: {} seconds".format(round(elapsed_time,2)))
-    print("=*80")
+    print("======")
 
 
 def datestr():
@@ -79,10 +77,10 @@ def find_replace_re(config_tmp, find_str, replace_str):
             print(re.sub(find_str, str(replace_str), line.rstrip(), flags=re.MULTILINE), end='\n')
 
 
-def denseCRF(id, t1, t2, input_shape, config, in_dir, out_dir, pred_labels):
+def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
     X, Y, Z = input_shape
     config_tmp = "/tmp/" + id + "_config_densecrf.txt"
-    print(config_tmp)
+    print(out_dir)
     subprocess.call(["cp", "-f", config, config_tmp])
     # find and replace placeholder with actual filenames
     find_str = [

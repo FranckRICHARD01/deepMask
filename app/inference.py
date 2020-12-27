@@ -18,11 +18,8 @@ import torchvision.transforms as transforms
 
 from mo_dots import Data
 import setproctitle
-import operator
 
-import nibabel as nib
-from nibabel.processing import resample_to_output as resample
-from sklearn import metrics
+import multiprocessing
 
 from base import *
 from utils import *
@@ -32,10 +29,11 @@ import vnet
 args = Data()
 args.batchSz = 3
 args.ngpu = 1
+args.cpus = multiprocessing.cpu_count()
 
 args.evaluate = ''
 
-args.outdir = '/app/outputs/'
+args.outdir = '/tmp'
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
 args.model = 'vnet.masker.20180316_0441'
@@ -49,13 +47,12 @@ args.nEpochs = 100
 resize = (160,160,160)
 
 args.cuda = torch.cuda.is_available()
-print(args.cuda)
-# args.cuda = False
 
 # set process title for htop/nvidia-smi/ytop monitoring
 setproctitle.setproctitle(args.model + '_' + str(sys.argv[1]))
 
 torch.manual_seed(args.seed)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
@@ -68,12 +65,14 @@ model = vnet.VNet(n_filters=6, outChans=2, elu=True, nll=True)
 batch_size = args.ngpu * args.batchSz
 gpu_ids = range(args.ngpu)
 
-if args.cuda:
-    model = nn.parallel.DataParallel(model, device_ids = gpu_ids)
+model = nn.parallel.DataParallel(model, device_ids=device)
 
 if os.path.isfile(args.inference):
     print("=> loading checkpoint '{}'".format(args.inference))
-    checkpoint = torch.load(args.inference)
+    if args.cuda:
+        checkpoint = torch.load(args.inference)
+    else:
+        checkpoint = torch.load(args.inference, map_location=torch.device('cpu'))
     args.start_epoch = checkpoint['epoch']
     best_prec1 = checkpoint['best_prec1']
     model.load_state_dict(checkpoint['state_dict'])
@@ -98,10 +97,8 @@ inferenceSet = InferMaskDataset(
                                 transform = transforms.Compose([ inferResize(resize), ToTensorInfer() ])
                                )
 
-kwargs = {'num_workers': 1} if args.cuda else {}
-# src = args.inference
-# dst = args.save
-# inference_batch_size = args.ngpu
+kwargs = {'num_workers': 1} if args.cuda else {'num_workers': args.cpus // 2}
+
 loader = DataLoader(inferenceSet, batch_size=1, shuffle=False, **kwargs) # do not change batch_size=1
 
-inference(args, loader, model, t2w_fname=sys.argv[4]+sys.argv[3], nifti=True) # corresponds to InferMaskDataset
+inference(args, loader, model, t2w_fname=os.path.join(sys.argv[4], sys.argv[3]), nifti=True) # corresponds to InferMaskDataset
