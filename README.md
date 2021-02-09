@@ -45,7 +45,7 @@ pip install -r app/requirements.txt
 
 
 ## License
-```
 (from [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause))
+```
 Copyright 2021 Neuroimaging of Epilepsy Laboratory, McGill University
 ```
