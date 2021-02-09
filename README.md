@@ -7,7 +7,7 @@
         <img src="https://img.shields.io/badge/Python-3.7-ff69b4.svg" /></a>
        <a href= "https://pytorch.org/">
         <img src="https://img.shields.io/badge/PyTorch-1.7-2BAF2B.svg" /></a>
-       <a href= "https://github.com/NOEL-MNI/deepMask/blob/master/LICENSE">
+       <a href= "https://github.com/NOEL-MNI/deepMask/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
 </p>
 
@@ -17,7 +17,7 @@ Authors: [Ravnoor Gill](https://github.com/ravnoor), [Benoit Caldairou](https://
 
 ------------------------
 
-Implementation based on:
+Implementation based on:<br>
 Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolutional neural networks for volumetric medical image segmentation](https://arxiv.org/abs/1606.04797). In 2016 Fourth International Conference on 3D vision (3DV) (pp. 565-571). IEEE.
 
 
@@ -53,10 +53,16 @@ pip install -r app/requirements.txt
 
 ## Usage
 ###TODO: Training and Inference
-
+### Docker
+```
+docker run -it -v /tmp:/tmp deepmask /app/inference.py \
+                                            $PATIENT_ID \
+                                            /tmp/T1.nii.gz /tmp/FLAIR.nii.gz \
+                                            /tmp
+```
 
 ## License
-(from [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause))
+<a href= "https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
 ```
 Copyright 2021 Neuroimaging of Epilepsy Laboratory, McGill University
 ```
