@@ -1,4 +1,15 @@
-# Accurate and Reliable Brain Extraction in Cortical Malformations
+<h1 align="center">
+  <b>Accurate and Reliable Brain Extraction in Cortical Malformations</b><br>
+</h1>
+
+<p align="center">
+      <a href="https://www.python.org/">
+        <img src="https://img.shields.io/badge/Python-3.7-ff69b4.svg" /></a>
+       <a href= "https://pytorch.org/">
+        <img src="https://img.shields.io/badge/PyTorch-1.7-2BAF2B.svg" /></a>
+       <a href= "https://github.com/NOEL-MNI/deepMask/blob/master/LICENSE">
+        <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
+</p>
 
 PyTorch Implementation using V-net variant of Fully Convolutional Neural Networks
 
