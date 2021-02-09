@@ -7,7 +7,7 @@ Authors: [Ravnoor Gill](https://github.com/ravnoor), [Benoit Caldairou](https://
 ------------------------
 
 Implementation based on:
-Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolutional neural networks for volumetric medical image segmentation. In 2016 fourth international conference on 3D vision (3DV) (pp. 565-571). IEEE.
+Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolutional neural networks for volumetric medical image segmentation](https://arxiv.org/abs/1606.04797). In 2016 Fourth International Conference on 3D vision (3DV) (pp. 565-571). IEEE.
 
 
 ### Please cite:
@@ -25,11 +25,11 @@ Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolu
 
 ## Pre-requisites
 ###TODO: Update version requirements
-You need to have following in order for this library to work as expected
+```
 1. Python >= 3.5
 2. Pytorch >= 1.0.0
 3. Nibabel >= 1.14.0
-
+```
 
 ## Installation
 
@@ -45,7 +45,8 @@ pip install -r app/requirements.txt
 
 
 ## License 
-(from [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)) Copyright 2021 Neuroimaging of Epilepsy Laboratory, McGill University
+(from [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause))
+Copyright 2021 Neuroimaging of Epilepsy Laboratory, McGill University
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
