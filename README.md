@@ -1,5 +1,5 @@
 <h1 align="center">
-  <b>Accurate and Reliable Brain Extraction in Cortical Malformations</b><br>
+  <b>Accurate Brain Segmentation in Malformations of Cortical Development</b><br>
 </h1>
 
 <p align="center">
@@ -12,6 +12,8 @@
 </p>
 
 PyTorch Implementation using V-net variant of Fully Convolutional Neural Networks
+
+![](assets/diagram.png)
 
 Authors: [Ravnoor Gill](https://github.com/ravnoor), [Benoit Caldairou](https://github.com/bcaldairou), [Neda Bernasconi](https://noel.bic.mni.mcgill.ca/~noel/people/neda-bernasconi/) and [Andrea Bernasconi](https://noel.bic.mni.mcgill.ca/~noel/people/andrea-bernasconi/)
 
