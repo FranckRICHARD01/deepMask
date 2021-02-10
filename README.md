@@ -13,11 +13,11 @@
 
 PyTorch Implementation using V-net variant of Fully Convolutional Neural Networks
 
-![](assets/diagram.png)
-
 Authors: [Ravnoor Gill](https://github.com/ravnoor), [Benoit Caldairou](https://github.com/bcaldairou), [Neda Bernasconi](https://noel.bic.mni.mcgill.ca/~noel/people/neda-bernasconi/) and [Andrea Bernasconi](https://noel.bic.mni.mcgill.ca/~noel/people/andrea-bernasconi/)
 
 ------------------------
+
+![](assets/diagram.png)
 
 Implementation based on:<br>
 Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolutional neural networks for volumetric medical image segmentation](https://arxiv.org/abs/1606.04797). In 2016 Fourth International Conference on 3D vision (3DV) (pp. 565-571). IEEE.
