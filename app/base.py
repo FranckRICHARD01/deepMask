@@ -3,7 +3,6 @@
 Data Loading and Processing
 requires:
 -  ``scikit-image``: For image io and transforms
--  ``pandas``: For easier csv parsing
 -  ``nibabel``: To read NIFTI files
 
 """
@@ -15,8 +14,7 @@ import torch
 from nibabel import load as load_nii
 from skimage import transform as skt
 import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torchvision import transforms, utils
 
 # Ignore warnings
