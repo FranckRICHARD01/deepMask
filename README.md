@@ -5,10 +5,12 @@
 <p align="center">
       <a href="https://www.python.org/">
         <img src="https://img.shields.io/badge/Python-3.7-ff69b4.svg" /></a>
-       <a href= "https://pytorch.org/">
+      <a href= "https://pytorch.org/">
         <img src="https://img.shields.io/badge/PyTorch-1.7-2BAF2B.svg" /></a>
-       <a href= "https://github.com/NOEL-MNI/deepMask/blob/main/LICENSE">
+      <a href= "https://github.com/NOEL-MNI/deepMask/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
+      <a href= "https://zenodo.org/deposit/4521716">
+        <img src="https://zenodo.org/badge/4521716.svg" /></a>
 </p>
 
 PyTorch Implementation using V-net variant of Fully Convolutional Neural Networks
@@ -24,7 +26,7 @@ Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolu
 
 
 ### Please cite:
-```
+```TeX
 @misc{Gill2021,
   author = {Gill RS, et al},
   title = {Accurate and Reliable Brain Extraction in Cortical Malformations},
@@ -38,7 +40,7 @@ Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolu
 
 ## Pre-requisites
 ###TODO: Update version requirements
-```
+```console
 1. Python >= 3.5
 2. Pytorch >= 1.0.0
 3. Nibabel >= 1.14.0
@@ -46,7 +48,7 @@ Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolu
 
 ## Installation
 
-```
+```console
 conda create -n deepMask python=3.8
 conda activate deepMask
 pip install -r app/requirements.txt
@@ -56,8 +58,8 @@ pip install -r app/requirements.txt
 ## Usage
 ###TODO: Training and Inference
 ### Docker
-```
-docker run -it -v /tmp:/tmp deepmask /app/inference.py \
+```console
+docker run -it -v /tmp:/tmp docker.pkg.github.com/noel-mni/deepmask/app:latest /app/inference.py \
                                             $PATIENT_ID \
                                             /tmp/T1.nii.gz /tmp/FLAIR.nii.gz \
                                             /tmp
@@ -65,6 +67,6 @@ docker run -it -v /tmp:/tmp deepmask /app/inference.py \
 
 ## License
 <a href= "https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
-```
+```console
 Copyright 2021 Neuroimaging of Epilepsy Laboratory, McGill University
 ```
