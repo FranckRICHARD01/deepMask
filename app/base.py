@@ -53,7 +53,7 @@ class InferMaskDataset(Dataset):
         return sample
 
 
-class inferResize(object):
+class InferResize(object):
     """
     center crop the image in a sample to a specified size
 
