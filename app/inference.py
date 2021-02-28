@@ -4,21 +4,14 @@ usage:
 inference.py ${id} ${id}_t1.nii.gz ${id}_flair.nii.gz ${IN_DIR} ${OUT_DIR}
 """
 
-import os, math, sys, time
+import os, sys, time
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.init as init
-import torch.optim as optim
-import torch.nn.functional as F
-
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
-
 from mo_dots import Data
 import setproctitle
-
 import multiprocessing
 
 from base import *
@@ -37,7 +30,9 @@ args.outdir = '/tmp'
 
 # args.save='vnet.masker.20180309_1316' # training, N=133
 args.model = 'vnet.masker.20180316_0441'
-args.inference = '/app/weights/vnet_masker_model_best.pth.tar' # vnet.masker.20180316_0441' # training, N=153
+# training based on manually corrected masks from
+# 153 patients with cortical malformations
+args.inference = '/app/weights/vnet_masker_model_best.pth.tar' 
 
 args.seed = 1
 args.opt = 'adam'
@@ -61,6 +56,7 @@ else:
     print("build vnet, using CPU")
 
 start_time = time.time()
+# do not change these variable for inference
 model = vnet.VNet(n_filters=6, outChans=2, elu=True, nll=True)
 batch_size = args.ngpu * args.batchSz
 gpu_ids = range(args.ngpu)
@@ -82,7 +78,6 @@ if os.path.isfile(args.inference):
 else:
     sys.exit("=> no checkpoint found at '{}'".format(args.inference))
 
-
 print('  + Number of params: {}'.format(
     sum([p.data.nelement() for p in model.parameters()])))
 
@@ -92,13 +87,16 @@ if args.cuda:
 
 inferenceSet = InferMaskDataset(
                                 id = sys.argv[1],
-                                t1 = sys.argv[2], flair = sys.argv[3],
+                                t1 = sys.argv[2],
+                                flair = sys.argv[3],
                                 root_dir = sys.argv[4],
                                 transform = transforms.Compose([ inferResize(resize), ToTensorInfer() ])
                                )
 
 kwargs = {'num_workers': 1} if args.cuda else {'num_workers': args.cpus // 2}
 
-loader = DataLoader(inferenceSet, batch_size=1, shuffle=False, **kwargs) # do not change batch_size=1
+# do not change batch_size=1
+loader = DataLoader(inferenceSet, batch_size=1, shuffle=False, **kwargs)
 
-inference(args, loader, model, t2w_fname=os.path.join(sys.argv[4], sys.argv[3]), nifti=True) # corresponds to InferMaskDataset
+# corresponds to InferMaskDataset
+deepMask(args, loader, model, t2w_fname=os.path.join(sys.argv[4], sys.argv[3]), nifti=True)
