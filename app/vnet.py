@@ -4,14 +4,19 @@ import torch.nn.functional as F
 from torch.nn.modules.batchnorm import _BatchNorm
 
 
+BN_3d=nn.BatchNorm3d
+
+
 def passthrough(x, **kwargs):
     return x
+
 
 def ELUCons(elu, nchan):
     if elu:
         return nn.ELU(inplace=True)
     else:
         return nn.PReLU(nchan)
+
 
 class Flatten(nn.Module):
     def __init__(self):
@@ -20,23 +25,6 @@ class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
 
-# normalization between sub-volumes is necessary
-# for good performance
-class ContBatchNorm3d(_BatchNorm):
-    def _check_input_dim(self, input):
-        if input.dim() != 5:
-            raise ValueError('expected 5D input (got {}D input)'
-                             .format(input.dim()))
-        super(ContBatchNorm3d, self)._check_input_dim(input)
-
-    def forward(self, input):
-        self._check_input_dim(input)
-        return F.batch_norm(
-            input, self.running_mean, self.running_var, self.weight, self.bias,
-            True, self.momentum, self.eps)
-
-# BN_3d=ContBatchNorm3d
-BN_3d=nn.BatchNorm3d
 
 class LUConv(nn.Module):
     def __init__(self, nchan, elu):
@@ -147,7 +135,6 @@ class OutputTransition(nn.Module):
 
 class VNet(nn.Module):
     # the number of convolutions in each layer corresponds
-    # to what is in the actual prototxt, not the intent
     def __init__(self, n_filters=16, outChans=2, elu=True, nll=False):
         super(VNet, self).__init__()
         self.in_tr = InputTransition(n_filters, elu)
@@ -161,7 +148,7 @@ class VNet(nn.Module):
         self.up_tr32 = UpTransition(n_filters*4, n_filters*2, 1, elu)
         self.out_tr = OutputTransition(n_filters*2, outChans, elu, nll)
 
-    # The network topology as described in the diagram
+    # the network topology as described in the diagram
     # in the VNet paper
     def forward(self, x):
         out16 = self.in_tr(x)
