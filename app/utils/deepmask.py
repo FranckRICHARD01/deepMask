@@ -5,8 +5,6 @@ import time
 import subprocess
 import numpy as np
 from sklearn.utils import class_weight
-import matplotlib.cm as cm
-from scipy import ndimage
 import nibabel as nib
 from nibabel import load as load_nii
 import torch
@@ -24,7 +22,7 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
     start_time = time.time()
     t1w_np = skt.resize(t1w_np, args.resize, mode='constant', preserve_range=1)
     t2w_np = skt.resize(t2w_np, args.resize, mode='constant', preserve_range=1)
-    data = torch.from_numpy(np.stack((t1w_np, t2w_np), axis=0))
+    data = torch.unsqueeze(torch.from_numpy(np.stack((t1w_np, t2w_np), axis=0)), 0)
 
     # load original input with header and affine
     _, header, affine, out_shape = get_nii_hdr_affine(t1w_fname)
@@ -58,7 +56,7 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
     print("=> inference time: {} seconds".format(round(elapsed_time,2)))
     print("======")
 
-    config = '/app/dense3dCrf/config_densecrf.txt'
+    config = './utils/dense3dCrf/config_densecrf.txt'
 
     start_time = time.time()
     denseCRF(case_id, t1w_fname, t2w_fname, out_shape, config, dst, os.path.join(dst, case_id+"_vnet_maskpred.nii.gz"))
@@ -75,9 +73,9 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
 def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
     X, Y, Z = input_shape
     config_tmp = "/tmp/" + id + "_config_densecrf.txt"
-    print(out_dir)
     subprocess.call(["cp", "-f", config, config_tmp])
-    # find and replace placeholder with actual filenames
+    # shutil.copyfile(config, config_tmp)
+    # find and replace placeholder variables in the config file with actual filenames
     find_str = [
                 "<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>",
                 "<OUTDIR_PLACEHOLDER>", "<PRED_LABELS_PLACEHOLDER>",
@@ -91,7 +89,7 @@ def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
 
     for fs, rs in zip(find_str, replace_str):
         find_replace_re(config_tmp, fs, rs)
-    subprocess.call(["/app/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+    subprocess.call(["./utils/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
 
 
 def datestr():
@@ -103,9 +101,6 @@ def find_replace_re(config_tmp, find_str, replace_str):
     with fileinput.FileInput(config_tmp, inplace=True, backup='.bak') as file:
         for line in file:
             print(re.sub(find_str, str(replace_str), line.rstrip(), flags=re.MULTILINE), end='\n')
-
-
-
 
 
 def compute_weights(labels, binary=False):
@@ -143,33 +138,3 @@ def get_nii_hdr_affine(t1w_fname):
     header = load_nii(t1w_fname).header
     affine = header.get_qform()
     return nifti, header, affine, shape
-
-
-def plotslice(i, image, label, ax, fig, x, y, z, alfa=0.5, binarize=False, mask=False):
-
-    if binarize:
-        label = (label > 0).astype(np.int_)
-
-    if mask:
-        label = (label > 0).astype(np.int_)
-        t1w_bin = (image > 0).astype(np.int_)
-        mask = t1w_bin + label
-        label = t1w_bin
-
-    ax = plt.subplot(1, 3, 1)
-    ax.set_title('Sample #{}'.format(i))
-    ax.axis('off')
-    plt.imshow(ndimage.rotate(image[x,:,:],90), cmap=cm.gray)
-    plt.imshow(ndimage.rotate(label[x,:,:],90), cmap=cm.viridis, alpha=alfa)
-
-    ax = plt.subplot(1, 3, 2)
-    ax.set_title('Sample #{}'.format(i))
-    ax.axis('off')
-    plt.imshow(ndimage.rotate(image[:,y,:],90), cmap=cm.gray)
-    plt.imshow(ndimage.rotate(label[:,y,:],90), cmap=cm.viridis, alpha=alfa)
-
-    ax = plt.subplot(1, 3, 3)
-    ax.set_title('Sample #{}'.format(i), )
-    ax.axis('off')
-    plt.imshow(ndimage.rotate(image[:,:,z],90), cmap=cm.gray)
-    plt.imshow(ndimage.rotate(label[:,:,z],90), cmap=cm.viridis, alpha=alfa)
