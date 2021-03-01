@@ -40,7 +40,7 @@ os.environ[ "ANTS_RANDOM_SEED" ] = "666"
 
 
 class noelImageProcessor:
-    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, usen3=False, args=None, model=None):
+    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, usen3=False, args=None, model=None, QC=None):
         super(noelImageProcessor, self).__init__()
         self._id            = id
         self._t1file        = t1
@@ -50,6 +50,8 @@ class noelImageProcessor:
         self._usen3         = usen3
         self._args          = args
         self._model         = model
+        self._QC            = QC
+        self._dpi           = 300
 
     def __load_nifti_file(self):
     	# load nifti data to memory
@@ -94,17 +96,17 @@ class noelImageProcessor:
         if not os.path.exists('./qc'):
             os.makedirs('./qc')
         if self._t1file != None and self._t2file != None:
-            self._icbm152.plot(overlay=self._t1, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T1w - Before Registration', filename='./qc/000_t1_before_registration.png', dpi=450)
-            self._icbm152.plot(overlay=self._t1_reg['warpedmovout'], overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T1w - After Registration', filename='./qc/001_t1_after_registration.png', dpi=450)
-            self._icbm152.plot(overlay=self._t2, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T2w - Before Registration', filename='./qc/002_t2_before_registration.png', dpi=450)
-            self._icbm152.plot(overlay=self._t2_reg, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T2w - After Registration', filename='./qc/003_t2_after_registration.png', dpi=450)
+            self._icbm152.plot(overlay=self._t1, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T1w - Before Registration', filename='./qc/000_t1_before_registration.png', dpi=self._dpi)
+            self._icbm152.plot(overlay=self._t1_reg['warpedmovout'], overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T1w - After Registration', filename='./qc/001_t1_after_registration.png', dpi=self._dpi)
+            self._icbm152.plot(overlay=self._t2, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T2w - Before Registration', filename='./qc/002_t2_before_registration.png', dpi=self._dpi)
+            self._icbm152.plot(overlay=self._t2_reg, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='T2w - After Registration', filename='./qc/003_t2_after_registration.png', dpi=self._dpi)
 
-            ants.plot(self._t1_reg['warpedmovout'], axis=2, ncol=8, nslices=32, cmap='jet', title='T1w - Before Bias Correction', filename='./qc/004_t1_before_bias_correction.png', dpi=450)
-            ants.plot(self._t1_n4, axis=2, ncol=8, nslices=32, cmap='jet', title='T1w - After Bias Correction', filename='./qc/005_t1_after_bias_correction.png', dpi=450)
-            ants.plot(self._t2_reg, axis=2, ncol=8, nslices=32, cmap='jet', title='T2w - Before Bias Correction', filename='./qc/006_t2_before_bias_correction.png', dpi=450)
-            ants.plot(self._t2_n4, axis=2, ncol=8, nslices=32, cmap='jet', title='T2w - After Bias Correction', filename='./qc/007_t2_after_bias_correction.png', dpi=450)
+            ants.plot(self._t1_reg['warpedmovout'], axis=2, ncol=8, nslices=32, cmap='jet', title='T1w - Before Bias Correction', filename='./qc/004_t1_before_bias_correction.png', dpi=self._dpi)
+            ants.plot(self._t1_n4, axis=2, ncol=8, nslices=32, cmap='jet', title='T1w - After Bias Correction', filename='./qc/005_t1_after_bias_correction.png', dpi=self._dpi)
+            ants.plot(self._t2_reg, axis=2, ncol=8, nslices=32, cmap='jet', title='T2w - Before Bias Correction', filename='./qc/006_t2_before_bias_correction.png', dpi=self._dpi)
+            ants.plot(self._t2_n4, axis=2, ncol=8, nslices=32, cmap='jet', title='T2w - After Bias Correction', filename='./qc/007_t2_after_bias_correction.png', dpi=self._dpi)
 
-            self._t1_n4.plot(overlay=self._mask, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='Brain Masking', filename='./qc/008_brain_masking.png', dpi=450)
+            self._t1_n4.plot(overlay=self._mask, overlay_alpha=0.5, axis=2, ncol=8, nslices=32, title='Brain Masking', filename='./qc/008_brain_masking.png', dpi=self._dpi)
 
             with PdfPages(os.path.join(self._outputdir, self._id+"_QC_report.pdf")) as pdf:
                 for i in sorted(os.listdir('./qc')):
@@ -113,7 +115,7 @@ class noelImageProcessor:
                         img = Image.open(os.path.join('./qc', i))
                         plt.imshow(img)
                         plt.axis('off')
-                        pdf.savefig(dpi=450)
+                        pdf.savefig(dpi=self._dpi)
                         plt.close()
                         os.remove(os.path.join('./qc', i))
 
@@ -127,7 +129,7 @@ class noelImageProcessor:
                     zip_archive.write(os.path.join(folder, file), file, compress_type = zipfile.ZIP_DEFLATED)
         zip_archive.close()
 
-    def preprocessor(self):
+    def pipeline(self):
         start = time.time()
         if self._t1file.lower().endswith(('.nii.gz', '.nii')):
             self.__load_nifti_file()
@@ -137,7 +139,8 @@ class noelImageProcessor:
         self.__register_to_MNI_space()
         self.__bias_correction()
         self.__deepMask_skull_stripping()
-        self.__generate_QC_maps()
+        if self._QC:
+            self.__generate_QC_maps()
         # self.__create_zip_archive()
         end = time.time()
         print("pipeline processing time elapsed: {} seconds".format(np.round(end-start, 1)))
