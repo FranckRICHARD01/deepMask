@@ -167,7 +167,7 @@ class VNet(nn.Module):
 def build_model(args):
     # do not change these variable for inference
     model = VNet(n_filters=6, outChans=2, elu=True, nll=True)
-    model = nn.parallel.DataParallel(model, device_ids=args.device)
+    model = nn.parallel.DataParallel(model, device_ids=args.device_ids)
 
     if os.path.isfile(args.inference):
         print("=> loading checkpoint '{}'".format(args.inference))
