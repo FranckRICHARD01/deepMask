@@ -22,7 +22,7 @@ args.inference = './weights/vnet_masker_model_best.pth.tar'
 # resize all input images to this resolution  matching training data
 args.resize = (160,160,160)
 
-args.use_gpu = True
+args.use_gpu = False
 args.cuda = torch.cuda.is_available() and args.use_gpu
 
 torch.manual_seed(args.seed)
