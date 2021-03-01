@@ -6,8 +6,8 @@ import torch
 from mo_dots import Data
 from utils.data import *
 from utils.deepmask import *
-import vnet
 from utils.image_processing import noelImageProcessor
+import vnet
 
 # configuration
 args = Data()
@@ -17,12 +17,13 @@ args.seed = 666
 
 # training based on manually corrected masks from
 # 153 patients with cortical malformations
-args.inference = './weights/vnet_masker_model_best.pth.tar' 
+args.inference = './weights/vnet_masker_model_best.pth.tar'
 
 # resize all input images to this resolution  matching training data
 args.resize = (160,160,160)
 
-args.cuda = torch.cuda.is_available()
+args.use_gpu = True
+args.cuda = torch.cuda.is_available() and args.use_gpu
 
 torch.manual_seed(args.seed)
 args.device_ids = list(range(torch.cuda.device_count()))
