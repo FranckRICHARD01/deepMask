@@ -20,10 +20,8 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
 
     # for sample in loader:
     start_time = time.time()
-    t1w_np = skt.resize(t1w_np, args.resize, mode='constant', preserve_range=1)
-    t2w_np = skt.resize(t2w_np, args.resize, mode='constant', preserve_range=1)
-    data = torch.unsqueeze(torch.from_numpy(np.stack((t1w_np, t2w_np), axis=0)), 0)
-
+    
+    data = normalize_resize_to_tensor(t1w_np, t2w_np, args)
     # load original input with header and affine
     _, header, affine, out_shape = get_nii_hdr_affine(t1w_fname)
 
@@ -70,11 +68,19 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
     return seg_map
 
 
+def normalize_resize_to_tensor(t1w_np, t2w_np, args):
+    t1w_np = (t1w_np.astype(dtype=np.float32) - t1w_np[np.nonzero(t1w_np)].mean()) / t1w_np[np.nonzero(t1w_np)].std()
+    t2w_np = (t2w_np.astype(dtype=np.float32) - t2w_np[np.nonzero(t2w_np)].mean()) / t2w_np[np.nonzero(t2w_np)].std()
+    t1w_np = skt.resize(t1w_np, args.resize, mode='constant', preserve_range=1)
+    t2w_np = skt.resize(t2w_np, args.resize, mode='constant', preserve_range=1)
+    data = torch.unsqueeze(torch.from_numpy(np.stack((t1w_np, t2w_np), axis=0)), 0)
+    return data
+
+
 def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
     X, Y, Z = input_shape
     config_tmp = "/tmp/" + id + "_config_densecrf.txt"
     subprocess.call(["cp", "-f", config, config_tmp])
-    # shutil.copyfile(config, config_tmp)
     # find and replace placeholder variables in the config file with actual filenames
     find_str = [
                 "<ID_PLACEHOLDER>", "<T1_FILE_PLACEHOLDER>", "<FLAIR_FILE_PLACEHOLDER>",
