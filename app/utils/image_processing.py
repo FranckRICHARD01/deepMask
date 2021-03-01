@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # logfile = './logs.log'
-logfile = os.path.join('.', str(random_case_id())+'.log')
+logfile = os.path.join('/tmp', str(random_case_id())+'.log')
 # create a file handler
 try:
     os.remove(logfile)
@@ -72,10 +72,12 @@ class noelImageProcessor:
         logger.info("registration to MNI template space")
         print("registration to MNI template space")
         if self._t1file != None and self._t2file != None:
+            self._t1regfile = os.path.join(self._outputdir, self._id+'_t1_final.nii.gz')
+            self._t2regfile = os.path.join(self._outputdir, self._id+'_t2_final.nii.gz')
             self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = 'Affine' )
             self._t2_reg = ants.apply_transforms(fixed = self._icbm152, moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
-            ants.image_write( self._t1_reg['warpedmovout'], os.path.join(self._outputdir, self._id+'_t1_final.nii.gz'))
-            ants.image_write( self._t2_reg, os.path.join(self._outputdir, self._id+'_t2_final.nii.gz'))
+            ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
+            ants.image_write( self._t2_reg, self._t2regfile)
 
     def __bias_correction(self):
         logger.info("performing N4 bias correction")
@@ -88,7 +90,7 @@ class noelImageProcessor:
         logger.info("performing brain extraction using deepMask")
         print("performing brain extraction using deepMask")
         if self._t1file != None and self._t2file != None:
-            tmp = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1file, self._t2file)
+            tmp = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
             self._mask = self._t1_n4.new_image_like(tmp)
 
     def __generate_QC_maps(self):
