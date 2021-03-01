@@ -52,6 +52,10 @@ class noelImageProcessor:
         self._model         = model
         self._QC            = QC
         self._dpi           = 300
+        if self._usen3:
+            self._bias_correction = ants.n3_bias_field_correction
+        else:
+            self._bias_correction = ants.n4_bias_field_correction
 
     def __load_nifti_file(self):
     	# load nifti data to memory
@@ -80,11 +84,11 @@ class noelImageProcessor:
             ants.image_write( self._t2_reg, self._t2regfile)
 
     def __bias_correction(self):
-        logger.info("performing N4 bias correction")
-        print("performing N4 bias correction")
+        logger.info("performing N4/N3 bias correction")
+        print("performing N4/N3 bias correction")
         if self._t1file != None and self._t2file != None:
-            self._t1_n4 = ants.iMath(self._t1_reg['warpedmovout'].abp_n4(usen3 = self._usen3), "Normalize") * 100
-            self._t2_n4 = ants.iMath(self._t2_reg.abp_n4(usen3 = self._usen3), "Normalize") * 100
+            self._t1_n4 = ants.iMath(self._bias_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
+            self._t2_n4 = ants.iMath(self._bias_correction(self._t2_reg), "Normalize") * 100
 
     def __deepMask_skull_stripping(self):
         logger.info("performing brain extraction using deepMask")
