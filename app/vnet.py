@@ -1,11 +1,11 @@
+import os
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.modules.batchnorm import _BatchNorm
 
 
 BN_3d=nn.BatchNorm3d
-
 
 def passthrough(x, **kwargs):
     return x
@@ -162,3 +162,31 @@ class VNet(nn.Module):
         out = self.up_tr32(out, out16)
         out = self.out_tr(out)
         return out
+
+
+def build_model(args):
+    # do not change these variable for inference
+    model = VNet(n_filters=6, outChans=2, elu=True, nll=True)
+    model = nn.parallel.DataParallel(model, device_ids=args.device)
+
+    if os.path.isfile(args.inference):
+        print("=> loading checkpoint '{}'".format(args.inference))
+        if args.cuda:
+            checkpoint = torch.load(args.inference)
+        else:
+            checkpoint = torch.load(args.inference, map_location=torch.device('cpu'))
+        args.start_epoch = checkpoint['epoch']
+        model.load_state_dict(checkpoint['state_dict'])
+        print("=> loaded checkpoint '{}' (epoch {})"
+            .format(args.model, checkpoint['epoch']))
+    else:
+        sys.exit("=> no checkpoint found at '{}'".format(args.inference))
+
+    print('  + Number of params: {}'.format(
+        sum([p.data.nelement() for p in model.parameters()])))
+
+    if args.cuda:
+        print('moving the model to GPU')
+        model = model.cuda()
+
+    return model
