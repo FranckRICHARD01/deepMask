@@ -99,6 +99,11 @@ class noelImageProcessor:
         if self._t1file != None and self._t2file != None:
             tmp = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
             self._mask = self._t1_n4.new_image_like(tmp)
+            self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1_brain_final.nii.gz')
+            self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2_brain_final.nii.gz')
+            ants.image_write( self._t1_n4 * self._mask, self._t1brainfile )
+            ants.image_write( self._t2_n4 * self._mask, self._t2brainfile )
+
 
     def __generate_QC_maps(self):
         logger.info('generating QC report')
