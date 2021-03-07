@@ -76,19 +76,22 @@ class noelImageProcessor:
         logger.info("registration to MNI template space")
         print("registration to MNI template space")
         if self._t1file != None and self._t2file != None:
-            self._t1regfile = os.path.join(self._outputdir, self._id+'_t1_final.nii.gz')
-            self._t2regfile = os.path.join(self._outputdir, self._id+'_t2_final.nii.gz')
-            self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = 'Affine' )
+            self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = 'ElasticSyN' )
             self._t2_reg = ants.apply_transforms(fixed = self._icbm152, moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
-            ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
-            ants.image_write( self._t2_reg, self._t2regfile)
-
+            # ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
+            # ants.image_write( self._t2_reg, self._t2regfile)
+            
+            
     def __bias_correction(self):
-        logger.info("performing N4/N3 bias correction")
-        print("performing N4/N3 bias correction")
+        logger.info("performing N4 bias correction")
+        print("performing N4 bias correction")
         if self._t1file != None and self._t2file != None:
             self._t1_n4 = ants.iMath(self._bias_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
             self._t2_n4 = ants.iMath(self._bias_correction(self._t2_reg), "Normalize") * 100
+            self._t1regfile = os.path.join(self._outputdir, self._id+'_t1_final.nii.gz')
+            self._t2regfile = os.path.join(self._outputdir, self._id+'_t2_final.nii.gz')
+            ants.image_write( self._t1_n4, self._t1regfile )
+            ants.image_write( self._t2_n4, self._t2regfile )
 
     def __deepMask_skull_stripping(self):
         logger.info("performing brain extraction using deepMask")
@@ -129,7 +132,7 @@ class noelImageProcessor:
         print('creating a zip archive')
         logger.info('creating a zip archive')
         zip_archive = zipfile.ZipFile(os.path.join(self._outputdir, self._id + "_archive.zip"), 'w')
-        for folder, subfolders, files in os.walk(self._outputdir):
+        for folder, _, files in os.walk(self._outputdir):
             for file in files:
                 if file.endswith('.nii.gz'):
                     zip_archive.write(os.path.join(folder, file), file, compress_type = zipfile.ZIP_DEFLATED)
