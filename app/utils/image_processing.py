@@ -40,7 +40,7 @@ os.environ[ "ANTS_RANDOM_SEED" ] = "666"
 
 
 class noelImageProcessor:
-    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, usen3=False, args=None, model=None, QC=None):
+    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, usen3=False, args=None, model=None, QC=None, preprocess=True):
         super(noelImageProcessor, self).__init__()
         self._id            = id
         self._t1file        = t1
@@ -52,6 +52,8 @@ class noelImageProcessor:
         self._model         = model
         self._QC            = QC
         self._dpi           = 300
+        self._transform     = 'SyN'
+        self._preprocess    = preprocess
         if self._usen3:
             self._bias_correction = ants.n3_bias_field_correction
         else:
@@ -72,11 +74,12 @@ class noelImageProcessor:
             self._t2 = ants.image_read( self._t2file )
             self._icbm152 = ants.image_read( self._mni )
 
+
     def __register_to_MNI_space(self):
         logger.info("registration to MNI template space")
         print("registration to MNI template space")
         if self._t1file != None and self._t2file != None:
-            self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = 'ElasticSyN' )
+            self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = self._transform )
             self._t2_reg = ants.apply_transforms(fixed = self._icbm152, moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
             # ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
             # ants.image_write( self._t2_reg, self._t2regfile)
@@ -93,16 +96,23 @@ class noelImageProcessor:
             ants.image_write( self._t1_n4, self._t1regfile )
             ants.image_write( self._t2_n4, self._t2regfile )
 
+
     def __deepMask_skull_stripping(self):
         logger.info("performing brain extraction using deepMask")
         print("performing brain extraction using deepMask")
         if self._t1file != None and self._t2file != None:
-            tmp = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
-            self._mask = self._t1_n4.new_image_like(tmp)
             self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1_brain_final.nii.gz')
             self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2_brain_final.nii.gz')
-            ants.image_write( self._t1_n4 * self._mask, self._t1brainfile )
-            ants.image_write( self._t2_n4 * self._mask, self._t2brainfile )
+            if self._preprocess:
+                mask = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
+                self._mask = self._t1_n4.new_image_like(mask)
+                ants.image_write( self._t1_n4 * self._mask, self._t1brainfile )
+                ants.image_write( self._t2_n4 * self._mask, self._t2brainfile )
+            else:
+                mask = deepMask(self._args, self._model, self._id, self._t1.numpy(), self._t2.numpy(), self._t1file, self._t2file)
+                self._mask = self._t1.new_image_like(mask)
+                ants.image_write( self._t1 * self._mask, self._t1brainfile )
+                ants.image_write( self._t2 * self._mask, self._t2brainfile )
 
 
     def __generate_QC_maps(self):
@@ -150,9 +160,14 @@ class noelImageProcessor:
         else:
             raise Exception("Sorry, only NIfTI format is currently supported")
         
-        self.__register_to_MNI_space()
-        self.__bias_correction()
-        self.__deepMask_skull_stripping()
+        if self._preprocess:
+            self.__register_to_MNI_space()
+            self.__bias_correction()
+            self.__deepMask_skull_stripping()
+        else:
+            print("Skipping image preprocessing, presumably images are co-registered and bias-corrected")
+            self.__deepMask_skull_stripping()
+
         if self._QC:
             self.__generate_QC_maps()
         # self.__create_zip_archive()

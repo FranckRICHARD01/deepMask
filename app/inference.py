@@ -12,14 +12,14 @@ import vnet
 # configuration
 args = Data()
 
-args.outdir = '/tmp'
+args.outdir = '/host/hamlet/local_raid/data/ravnoor/sandbox/' + str(sys.argv[1])
 args.seed = 666
 
-# training based on manually corrected masks from
+# trained weights based on manually corrected masks from
 # 153 patients with cortical malformations
 args.inference = './weights/vnet_masker_model_best.pth.tar'
 
-# resize all input images to this resolution  matching training data
+# resize all input images to this resolution matching training data
 args.resize = (160,160,160)
 
 args.use_gpu = False
@@ -38,4 +38,4 @@ model = vnet.build_model(args)
 
 template = os.path.join('./template', 'mni_icbm152_t1_tal_nlin_sym_09a.nii.gz')
 
-noelImageProcessor(id=sys.argv[1], t1=sys.argv[2], t2=sys.argv[3], output_dir=args.outdir, template=template, usen3=False, args=args, model=model).pipeline()
+noelImageProcessor(id=sys.argv[1], t1=sys.argv[2], t2=sys.argv[3], output_dir=args.outdir, template=template, usen3=False, args=args, model=model, preprocess=False).pipeline()
