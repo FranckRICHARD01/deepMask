@@ -18,13 +18,10 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
 
     model.eval()
 
-    # for sample in loader:
     start_time = time.time()
-    
     data = normalize_resize_to_tensor(t1w_np, t2w_np, args)
     # load original input with header and affine
     _, header, affine, out_shape = get_nii_hdr_affine(t1w_fname)
-
     shape = data.size()
     # convert names to batch tensor
     if args.cuda:
@@ -50,18 +47,18 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
         nii_out.to_filename(os.path.join(dst, case_id+"_vnet_maskpred.nii.gz"))
 
     elapsed_time = time.time() - start_time
-    print("======")
+    print("="*70)
     print("=> inference time: {} seconds".format(round(elapsed_time,2)))
-    print("======")
+    print("="*70)
 
     config = './utils/dense3dCrf/config_densecrf.txt'
 
     start_time = time.time()
     denseCRF(case_id, t1w_fname, t2w_fname, out_shape, config, dst, os.path.join(dst, case_id+"_vnet_maskpred.nii.gz"))
     elapsed_time = time.time() - start_time
-    print("======")
+    print("="*70)
     print("=> dense 3D-CRF inference time: {} seconds".format(round(elapsed_time,2)))
-    print("======")
+    print("="*70)
 
     fname = os.path.join(dst, case_id + '_denseCrf3dSegmMap.nii.gz')
     seg_map = load_nii(fname).get_fdata()
