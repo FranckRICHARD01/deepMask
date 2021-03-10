@@ -86,8 +86,8 @@ class noelImageProcessor:
             
             
     def __bias_correction(self):
-        logger.info("performing N4 bias correction")
-        print("performing N4 bias correction")
+        logger.info("performing {} bias correction".format("N3" if self._usen3 else "N4"))
+        print("performing {} bias correction".format("N3" if self._usen3 else "N4"))
         if self._t1file != None and self._t2file != None:
             self._t1_n4 = ants.iMath(self._bias_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
             self._t2_n4 = ants.iMath(self._bias_correction(self._t2_reg), "Normalize") * 100
