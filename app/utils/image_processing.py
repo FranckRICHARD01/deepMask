@@ -54,10 +54,7 @@ class noelImageProcessor:
         self._dpi           = 300
         self._transform     = 'Affine'
         self._preprocess    = preprocess
-        if self._usen3:
-            self._bias_correction = ants.n3_bias_field_correction
-        else:
-            self._bias_correction = ants.n4_bias_field_correction
+
 
     def __load_nifti_file(self):
     	# load nifti data to memory
@@ -89,8 +86,12 @@ class noelImageProcessor:
         logger.info("performing {} bias correction".format("N3" if self._usen3 else "N4"))
         print("performing {} bias correction".format("N3" if self._usen3 else "N4"))
         if self._t1file != None and self._t2file != None:
-            self._t1_n4 = ants.iMath(self._bias_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
-            self._t2_n4 = ants.iMath(self._bias_correction(self._t2_reg), "Normalize") * 100
+            if self._usen3:
+                self._t1_n4 = ants.iMath(ants.n3_bias_field_correction(self._t1_reg['warpedmovout'], downsample_factor=4), "Normalize") * 100
+                self._t2_n4 = ants.iMath(ants.n3_bias_field_correction(self._t2_reg), "Normalize", downsample_factor=4) * 100
+            else:
+                self._t1_n4 = ants.iMath(ants.n4_bias_field_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
+                self._t2_n4 = ants.iMath(ants.n4_bias_field_correction(self._t2_reg), "Normalize") * 100
             self._t1regfile = os.path.join(self._outputdir, self._id+'_t1_final.nii.gz')
             self._t2regfile = os.path.join(self._outputdir, self._id+'_t2_final.nii.gz')
             ants.image_write( self._t1_n4, self._t1regfile )
