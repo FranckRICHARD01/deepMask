@@ -88,7 +88,7 @@ class noelImageProcessor:
         if self._t1file != None and self._t2file != None:
             if self._usen3:
                 self._t1_n4 = ants.iMath(ants.n3_bias_field_correction(self._t1_reg['warpedmovout'], downsample_factor=4), "Normalize") * 100
-                self._t2_n4 = ants.iMath(ants.n3_bias_field_correction(self._t2_reg), "Normalize", downsample_factor=4) * 100
+                self._t2_n4 = ants.iMath(ants.n3_bias_field_correction(self._t2_reg, downsample_factor=4), "Normalize") * 100
             else:
                 self._t1_n4 = ants.iMath(ants.n4_bias_field_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
                 self._t2_n4 = ants.iMath(ants.n4_bias_field_correction(self._t2_reg), "Normalize") * 100
