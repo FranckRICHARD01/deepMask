@@ -52,7 +52,7 @@ class noelImageProcessor:
         self._model         = model
         self._QC            = QC
         self._dpi           = 300
-        self._transform     = 'SyN'
+        self._transform     = 'Affine'
         self._preprocess    = preprocess
         if self._usen3:
             self._bias_correction = ants.n3_bias_field_correction
