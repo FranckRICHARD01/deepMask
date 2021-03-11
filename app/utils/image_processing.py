@@ -76,8 +76,9 @@ class noelImageProcessor:
         logger.info("registration to MNI template space")
         print("registration to MNI template space")
         if self._t1file != None and self._t2file != None:
-            self._t1_reg = ants.registration( fixed = self._icbm152, moving = self._t1, type_of_transform = self._transform )
-            self._t2_reg = ants.apply_transforms(fixed = self._icbm152, moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
+            self._t1_reg = ants.registration(fixed = self._icbm152, moving = self._t1, type_of_transform = self._transform)
+            self._t2_reg = ants.registration(fixed = self._t1_reg['warpedmovout'], moving = self._t2, type_of_transform = self._transform)
+            # self._t2_reg = ants.apply_transforms(fixed = self._t1_reg['warpedmovout'], moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
             # ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
             # ants.image_write( self._t2_reg, self._t2regfile)
             
@@ -88,10 +89,10 @@ class noelImageProcessor:
         if self._t1file != None and self._t2file != None:
             if self._usen3:
                 self._t1_n4 = ants.iMath(ants.n3_bias_field_correction(self._t1_reg['warpedmovout'], downsample_factor=4), "Normalize") * 100
-                self._t2_n4 = ants.iMath(ants.n3_bias_field_correction(self._t2_reg, downsample_factor=4), "Normalize") * 100
+                self._t2_n4 = ants.iMath(ants.n3_bias_field_correction(self._t2_reg['warpedmovout'], downsample_factor=4), "Normalize") * 100
             else:
                 self._t1_n4 = ants.iMath(ants.n4_bias_field_correction(self._t1_reg['warpedmovout']), "Normalize") * 100
-                self._t2_n4 = ants.iMath(ants.n4_bias_field_correction(self._t2_reg), "Normalize") * 100
+                self._t2_n4 = ants.iMath(ants.n4_bias_field_correction(self._t2_reg['warpedmovout']), "Normalize") * 100
             self._t1regfile = os.path.join(self._outputdir, self._id+'_t1_final.nii.gz')
             self._t2regfile = os.path.join(self._outputdir, self._id+'_t2_final.nii.gz')
             ants.image_write( self._t1_n4, self._t1regfile )
