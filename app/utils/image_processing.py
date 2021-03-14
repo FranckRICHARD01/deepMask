@@ -40,20 +40,20 @@ os.environ[ "ANTS_RANDOM_SEED" ] = "666"
 
 
 class noelImageProcessor:
-    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, usen3=False, args=None, model=None, QC=None, preprocess=True):
+    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, transform='Affine', usen3=False, args=None, model=None, QC=None, preprocess=True):
         super(noelImageProcessor, self).__init__()
         self._id            = id
         self._t1file        = t1
         self._t2file        = t2
         self._outputdir     = output_dir
         self._template      = template
+        self._transform     = transform
         self._usen3         = usen3
         self._args          = args
         self._model         = model
         self._QC            = QC
-        self._dpi           = 300
-        self._transform     = 'Affine'
         self._preprocess    = preprocess
+        self._dpi           = 300
 
 
     def __load_nifti_file(self):
@@ -61,9 +61,8 @@ class noelImageProcessor:
         logger.info("loading nifti files")
         print("loading nifti files")
         self._mni = self._template
-
         if self._t1file == None and self._t2file == None:
-        	logger.warn("Please load the data first.", "The data is missing")
+        	logger.warn("Please load the data first", "The data is invalid/missing")
         	return
 
         if self._t1file != None and self._t2file != None:
