@@ -15,9 +15,10 @@ args = Data()
 args.outdir = '/host/hamlet/local_raid/data/ravnoor/sandbox/' + str(sys.argv[1])
 args.seed = 666
 
+cwd = os.path.dirname(__file__)
 # trained weights based on manually corrected masks from
 # 153 patients with cortical malformations
-args.inference = './weights/vnet_masker_model_best.pth.tar'
+args.inference = os.path.join(cwd, 'weights', 'vnet_masker_model_best.pth.tar')
 
 # resize all input images to this resolution matching training data
 args.resize = (160,160,160)
@@ -36,6 +37,6 @@ else:
 
 model = vnet.build_model(args)
 
-template = os.path.join('./template', 'mni_icbm152_t1_tal_nlin_sym_09a.nii.gz')
+template = os.path.join(cwd, 'template', 'mni_icbm152_t1_tal_nlin_sym_09a.nii.gz')
 
 noelImageProcessor(id=sys.argv[1], t1=sys.argv[2], t2=sys.argv[3], output_suffix='_brain_final.nii.gz', output_dir=args.outdir, template=template, usen3=True, args=args, model=model, preprocess=True).pipeline()
