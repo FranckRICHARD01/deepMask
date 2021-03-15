@@ -2,8 +2,8 @@ import os, time, logging
 from sys import modules
 # read pngs to save as pdf
 from PIL import Image
-import matplotlib as mpl
-mpl.use("Qt5Agg")
+# import matplotlib as mpl
+# mpl.use("Qt5Agg")
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import ants
@@ -40,11 +40,12 @@ os.environ[ "ANTS_RANDOM_SEED" ] = "666"
 
 
 class noelImageProcessor:
-    def __init__(self, id, t1=None, t2=None, output_dir=None, template=None, transform='Affine', usen3=False, args=None, model=None, QC=None, preprocess=True):
+    def __init__(self, id, t1=None, t2=None, output_suffix='_brain_final.nii.gz', output_dir=None, template=None, transform='Affine', usen3=False, args=None, model=None, QC=None, preprocess=True):
         super(noelImageProcessor, self).__init__()
         self._id            = id
         self._t1file        = t1
         self._t2file        = t2
+        self._outsuffix     = output_suffix
         self._outputdir     = output_dir
         self._template      = template
         self._transform     = transform
@@ -102,8 +103,8 @@ class noelImageProcessor:
         logger.info("performing brain extraction using deepMask")
         print("performing brain extraction using deepMask")
         if self._t1file != None and self._t2file != None:
-            self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1_brain_final.nii.gz')
-            self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2_brain_final.nii.gz')
+            self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1'+self._outsuffix)
+            self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2'+self._outsuffix)
             if self._preprocess:
                 mask = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
                 self._mask = self._t1_n4.new_image_like(mask)
@@ -144,6 +145,7 @@ class noelImageProcessor:
                         plt.close()
                         os.remove(os.path.join('./qc', i))
 
+
     def __create_zip_archive(self):
         print('creating a zip archive')
         logger.info('creating a zip archive')
@@ -153,6 +155,7 @@ class noelImageProcessor:
                 if file.endswith('.nii.gz'):
                     zip_archive.write(os.path.join(folder, file), file, compress_type = zipfile.ZIP_DEFLATED)
         zip_archive.close()
+
 
     def pipeline(self):
         start = time.time()

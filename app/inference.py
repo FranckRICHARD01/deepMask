@@ -38,4 +38,4 @@ model = vnet.build_model(args)
 
 template = os.path.join('./template', 'mni_icbm152_t1_tal_nlin_sym_09a.nii.gz')
 
-noelImageProcessor(id=sys.argv[1], t1=sys.argv[2], t2=sys.argv[3], output_dir=args.outdir, template=template, usen3=True, args=args, model=model, preprocess=True).pipeline()
+noelImageProcessor(id=sys.argv[1], t1=sys.argv[2], t2=sys.argv[3], output_suffix='_brain_final.nii.gz', output_dir=args.outdir, template=template, usen3=True, args=args, model=model, preprocess=True).pipeline()
