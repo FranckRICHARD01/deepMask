@@ -51,7 +51,9 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
     print("=> inference time: {} seconds".format(round(elapsed_time,2)))
     print("="*70)
 
-    config = './utils/dense3dCrf/config_densecrf.txt'
+    # config = './utils/dense3dCrf/config_densecrf.txt'
+    cwd = os.path.dirname(__file__)
+    config = os.path.join(cwd, 'dense3dCrf/config_densecrf.txt')
 
     start_time = time.time()
     denseCRF(case_id, t1w_fname, t2w_fname, out_shape, config, dst, os.path.join(dst, case_id+"_vnet_maskpred.nii.gz"))
@@ -75,6 +77,7 @@ def normalize_resize_to_tensor(t1w_np, t2w_np, args):
 
 
 def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
+    cwd = os.path.dirname(__file__)
     X, Y, Z = input_shape
     config_tmp = "/tmp/" + id + "_config_densecrf.txt"
     subprocess.call(["cp", "-f", config, config_tmp])
@@ -92,7 +95,9 @@ def denseCRF(id, t1, t2, input_shape, config, out_dir, pred_labels):
 
     for fs, rs in zip(find_str, replace_str):
         find_replace_re(config_tmp, fs, rs)
-    subprocess.call(["./utils/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+    
+    # subprocess.call(["./utils/dense3dCrf/dense3DCrfInferenceOnNiis", "-c", config_tmp])
+    subprocess.call([os.path.join(cwd, 'dense3dCrf/dense3DCrfInferenceOnNiis'), "-c", config_tmp])
 
 
 def datestr():
