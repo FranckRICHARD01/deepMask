@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 LABEL maintainer="Ravnoor Singh Gill <ravnoor@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y \
@@ -30,7 +30,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux
     && /bin/bash Miniconda3-py37_4.9.2-Linux-x86_64.sh -b -p /home/user/conda \
     && rm Miniconda3-py37_4.9.2-Linux-x86_64.sh
 
-RUN conda install --yes pytorch torchvision cpuonly -c pytorch \
+RUN conda install --yes pytorch cudatoolkit=10.0 -c pytorch \
     && conda clean -ya
 
 COPY app/requirements.txt /app/requirements.txt
@@ -42,4 +42,4 @@ COPY app/ /app/
 
 RUN sudo chmod -R 777 /app && sudo chmod +x /app/inference.py
 
-CMD ["python3"]
+CMD ["python3", "inference.py"]
