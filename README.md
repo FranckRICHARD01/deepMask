@@ -9,8 +9,10 @@
         <img src="https://img.shields.io/badge/PyTorch-1.7-2BAF2B.svg" /></a>
       <a href= "https://github.com/NOEL-MNI/deepMask/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
-      <a href= "https://zenodo.org/deposit/4521716">
-        <img src="https://zenodo.org/badge/4521716.svg" /></a>
+      <a href="https://doi.org/10.5281/zenodo.4521706">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4521706.svg" alt="DOI"></a>
+
+
 </p>
 
 PyTorch Implementation using V-net variant of Fully Convolutional Neural Networks
