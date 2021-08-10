@@ -56,8 +56,8 @@ pip install -r app/requirements.txt
 
 
 ## Usage
-###TODO: Training and Inference
-### Docker
+### TODO: Training routine
+### Inference using Docker
 ```console
 docker run -it -v /tmp:/tmp docker.pkg.github.com/noel-mni/deepmask/app:latest /app/inference.py \
                                             $PATIENT_ID \
