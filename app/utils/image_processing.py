@@ -7,6 +7,7 @@ from PIL import Image
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import ants
+from antspynet.utilities import brain_extraction
 import numpy as np
 import multiprocessing
 import zipfile
@@ -99,22 +100,44 @@ class noelImageProcessor:
             ants.image_write( self._t2_n4, self._t2regfile )
 
 
-    def __deepMask_skull_stripping(self):
-        logger.info("performing brain extraction using deepMask")
-        print("performing brain extraction using deepMask")
-        if self._t1file != None and self._t2file != None:
-            self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1'+self._outsuffix)
-            self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2'+self._outsuffix)
+    def __skull_stripping(self):
+        # specify the output filenames for brain extracted images
+        self._t1brainfile = os.path.join(self._outputdir, self._id+'_t1'+self._outsuffix)
+        self._t2brainfile = os.path.join(self._outputdir, self._id+'_t2'+self._outsuffix)
+        if os.environ.get('BRAIN_MASKING') == "cpu":
+            logger.info("performing brain extraction using ANTsPyNet")
+            print("performing brain extraction using ANTsPyNet")
             if self._preprocess:
-                mask = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
-                self._mask = self._t1_n4.new_image_like(mask)
+                prob = brain_extraction(self._t1_n4, modality="t1")
+                # mask can be obtained as:
+                mask = ants.threshold_image(prob, low_thresh=0.6, high_thresh=1.0, inval=1, outval=0, binary=True)
+                self._mask = self._t1_n4.new_image_like(mask.numpy())
                 ants.image_write( self._t1_n4 * self._mask, self._t1brainfile )
                 ants.image_write( self._t2_n4 * self._mask, self._t2brainfile )
             else:
-                mask = deepMask(self._args, self._model, self._id, self._t1.numpy(), self._t2.numpy(), self._t1file, self._t2file)
-                self._mask = self._t1.new_image_like(mask)
-                ants.image_write( self._t1 * self._mask, self._t1brainfile )
-                ants.image_write( self._t2 * self._mask, self._t2brainfile )
+                prob = brain_extraction(self._t1, modality="t1")
+                # mask can be obtained as:
+                mask = ants.threshold_image(prob, low_thresh=0.6, high_thresh=1.0, inval=1, outval=0, binary=True)
+                self._mask = self._t1.new_image_like(mask.numpy())
+                # ants.image_write( self._t1 * self._mask, self._t1brainfile )
+                # ants.image_write( self._t2 * self._mask, self._t2brainfile )
+                # extract the brain and nomalize between 0 and 100
+                ants.image_write( ants.iMath(self._t1 * self._mask, "Normalize") * 100, self._t1brainfile )
+                ants.image_write( ants.iMath(self._t2 * self._mask, "Normalize") * 100, self._t2brainfile )
+        else:
+            logger.info("performing brain extraction using deepMask")
+            print("performing brain extraction using deepMask")
+            if self._t1file != None and self._t2file != None:
+                if self._preprocess:
+                    mask = deepMask(self._args, self._model, self._id, self._t1_n4.numpy(), self._t2_n4.numpy(), self._t1regfile, self._t2regfile)
+                    self._mask = self._t1_n4.new_image_like(mask)
+                    ants.image_write( self._t1_n4 * self._mask, self._t1brainfile )
+                    ants.image_write( self._t2_n4 * self._mask, self._t2brainfile )
+                else:
+                    mask = deepMask(self._args, self._model, self._id, self._t1.numpy(), self._t2.numpy(), self._t1file, self._t2file)
+                    self._mask = self._t1.new_image_like(mask)
+                    ants.image_write( self._t1 * self._mask, self._t1brainfile )
+                    ants.image_write( self._t2 * self._mask, self._t2brainfile )
 
 
     def __generate_QC_maps(self):
@@ -167,10 +190,10 @@ class noelImageProcessor:
         if self._preprocess:
             self.__register_to_MNI_space()
             self.__bias_correction()
-            self.__deepMask_skull_stripping()
+            self.__skull_stripping()
         else:
             print("Skipping image preprocessing, presumably images are co-registered and bias-corrected")
-            self.__deepMask_skull_stripping()
+            self.__skull_stripping()
 
         if self._QC:
             self.__generate_QC_maps()
