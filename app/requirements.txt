@@ -2,6 +2,7 @@ antspyx
 antspynet
 matplotlib
 mo-dots
+psutil
 nibabel
 scikit-image
 scikit-learn
