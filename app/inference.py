@@ -14,6 +14,8 @@ args = Data()
 
 args.outdir = os.path.join(sys.argv[4], str(sys.argv[1]))
 args.tmpdir = os.path.join(args.outdir, "tmp")
+if not os.path.exists(args.tmpdir):
+    os.makedirs(args.tmpdir)
 args.seed = 666
 
 cwd = os.path.dirname(__file__)
