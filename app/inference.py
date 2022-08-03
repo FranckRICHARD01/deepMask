@@ -13,6 +13,7 @@ import vnet
 args = Data()
 
 args.outdir = os.path.join(sys.argv[4], str(sys.argv[1]))
+args.tmpdir = os.path.join(args.outdir, 'tmp')
 args.seed = 666
 
 cwd = os.path.dirname(__file__)
