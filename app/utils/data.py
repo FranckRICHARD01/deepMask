@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 
 # ignore warnings
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -45,7 +46,7 @@ class InferMaskDataset(Dataset):
         t1w = (t1w.astype(dtype=np.float32) - t1w[np.nonzero(t1w)].mean()) / t1w[np.nonzero(t1w)].std()
         t2w = (t2w.astype(dtype=np.float32) - t2w[np.nonzero(t2w)].mean()) / t2w[np.nonzero(t2w)].std()
 
-        sample = {'t1w': t1w, 't2w': t2w, 'filename': t1w_fname, 'id': case_id}
+        sample = {"t1w": t1w, "t2w": t2w, "filename": t1w_fname, "id": case_id}
 
         if self.transform:
             sample = self.transform(sample)
@@ -63,16 +64,22 @@ class InferResize(object):
             if int: smaller of image edges is matched
             to `output_size` preserving the aspect ratio
     """
+
     def __init__(self, output_size):
         assert isinstance(output_size, tuple)
         self.output_size = output_size
 
     def __call__(self, sample):
-        t1w, t2w, t1w_fname, case_id = sample['t1w'], sample['t2w'], sample['filename'], sample['id']
-        t1w = skt.resize(t1w, self.output_size, mode='constant', preserve_range=1)
-        t2w = skt.resize(t2w, self.output_size, mode='constant', preserve_range=1)
+        t1w, t2w, t1w_fname, case_id = (
+            sample["t1w"],
+            sample["t2w"],
+            sample["filename"],
+            sample["id"],
+        )
+        t1w = skt.resize(t1w, self.output_size, mode="constant", preserve_range=1)
+        t2w = skt.resize(t2w, self.output_size, mode="constant", preserve_range=1)
 
-        return {'t1w': t1w, 't2w': t2w, 'filename': t1w_fname, 'id': case_id}
+        return {"t1w": t1w, "t2w": t2w, "filename": t1w_fname, "id": case_id}
 
 
 class ToTensorInfer(object):
@@ -94,11 +101,15 @@ class ToTensorInfer(object):
         - sample['id'] (string): patient ID
 
     """
+
     def __call__(self, sample):
-        t1w, t2w, t1w_fname, case_id = sample['t1w'], sample['t2w'], sample['filename'], sample['id']
+        t1w, t2w, t1w_fname, case_id = (
+            sample["t1w"],
+            sample["t2w"],
+            sample["filename"],
+            sample["id"],
+        )
 
         image = np.stack((t1w, t2w), axis=0)
 
-        return {'image': torch.from_numpy(image),
-                'filename': t1w_fname,
-                'id': case_id}
+        return {"image": torch.from_numpy(image), "filename": t1w_fname, "id": case_id}
