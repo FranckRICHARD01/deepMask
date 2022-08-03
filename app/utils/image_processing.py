@@ -215,8 +215,9 @@ class noelImageProcessor:
 
     def __generate_QC_maps(self):
         logger.info("generating QC report")
-        if not os.path.exists("./qc"):
-            os.makedirs("./qc")
+        qcdir = os.path.join(self._args.tmpdir, "qc")
+        if not os.path.exists(qcdir):
+            os.makedirs(qcdir)
         if self._t1file != None and self._t2file != None:
             self._icbm152.plot(
                 overlay=self._t1,
@@ -225,7 +226,7 @@ class noelImageProcessor:
                 ncol=8,
                 nslices=32,
                 title="T1w - Before Registration",
-                filename="./qc/000_t1_before_registration.png",
+                filename=os.path.join(qcdir, "000_t1_before_registration.png"),
                 dpi=self._dpi,
             )
             self._icbm152.plot(
@@ -235,7 +236,7 @@ class noelImageProcessor:
                 ncol=8,
                 nslices=32,
                 title="T1w - After Registration",
-                filename="./qc/001_t1_after_registration.png",
+                filename=os.path.join(qcdir, "001_t1_after_registration.png"),
                 dpi=self._dpi,
             )
             self._icbm152.plot(
@@ -245,7 +246,7 @@ class noelImageProcessor:
                 ncol=8,
                 nslices=32,
                 title="T2w - Before Registration",
-                filename="./qc/002_t2_before_registration.png",
+                filename=os.path.join(qcdir, "002_t2_before_registration.png"),
                 dpi=self._dpi,
             )
             self._icbm152.plot(
@@ -255,7 +256,7 @@ class noelImageProcessor:
                 ncol=8,
                 nslices=32,
                 title="T2w - After Registration",
-                filename="./qc/003_t2_after_registration.png",
+                filename=os.path.join(qcdir, "003_t2_after_registration.png"),
                 dpi=self._dpi,
             )
 
@@ -266,7 +267,7 @@ class noelImageProcessor:
                 nslices=32,
                 cmap="jet",
                 title="T1w - Before Bias Correction",
-                filename="./qc/004_t1_before_bias_correction.png",
+                filename=os.path.join(qcdir, "004_t1_before_bias_correction.png"),
                 dpi=self._dpi,
             )
             ants.plot(
@@ -276,7 +277,7 @@ class noelImageProcessor:
                 nslices=32,
                 cmap="jet",
                 title="T1w - After Bias Correction",
-                filename="./qc/005_t1_after_bias_correction.png",
+                filename=os.path.join(qcdir, "005_t1_after_bias_correction.png"),
                 dpi=self._dpi,
             )
             ants.plot(
@@ -286,7 +287,7 @@ class noelImageProcessor:
                 nslices=32,
                 cmap="jet",
                 title="T2w - Before Bias Correction",
-                filename="./qc/006_t2_before_bias_correction.png",
+                filename=os.path.join(qcdir, "006_t2_before_bias_correction.png"),
                 dpi=self._dpi,
             )
             ants.plot(
@@ -296,7 +297,7 @@ class noelImageProcessor:
                 nslices=32,
                 cmap="jet",
                 title="T2w - After Bias Correction",
-                filename="./qc/007_t2_after_bias_correction.png",
+                filename=os.path.join(qcdir, "007_t2_after_bias_correction.png"),
                 dpi=self._dpi,
             )
 
@@ -307,22 +308,22 @@ class noelImageProcessor:
                 ncol=8,
                 nslices=32,
                 title="Brain Masking",
-                filename="./qc/008_brain_masking.png",
+                filename=os.path.join(qcdir, "008_brain_masking.png"),
                 dpi=self._dpi,
             )
 
             with PdfPages(
                 os.path.join(self._outputdir, self._id + "_QC_report.pdf")
             ) as pdf:
-                for i in sorted(os.listdir("./qc")):
+                for i in sorted(os.listdir(qcdir)):
                     if i.endswith(".png"):
                         plt.figure()
-                        img = Image.open(os.path.join("./qc", i))
+                        img = Image.open(os.path.join(qcdir, i))
                         plt.imshow(img)
                         plt.axis("off")
                         pdf.savefig(dpi=self._dpi)
                         plt.close()
-                        os.remove(os.path.join("./qc", i))
+                        os.remove(os.path.join(qcdir, i))
 
     # def __create_zip_archive(self):
     #     print("creating a zip archive")
