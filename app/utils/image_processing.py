@@ -102,7 +102,7 @@ class noelImageProcessor:
             )
             # create directory to store transforms
             xfmdir = os.path.join(self._args.tmpdir, "xfms")
-            if not os.path.exists(os.path.join(xfmdir):
+            if not os.path.exists(xfmdir):
                 os.makedirs(xfmdir)
             # write forward transforms to xfmdir
             ants.write_transform(
