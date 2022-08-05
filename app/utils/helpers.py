@@ -1,6 +1,5 @@
 import os, random, string
 from ants import apply_ants_transform_to_image, image_write, read_transform
-from collections import Counter
 
 
 def write_nifti(input, id, output_dir, type):

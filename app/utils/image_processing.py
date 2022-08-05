@@ -1,5 +1,4 @@
 import os, time, logging
-from sys import modules
 
 # read pngs to save as pdf
 from PIL import Image
@@ -11,7 +10,7 @@ import matplotlib.pyplot as plt
 import ants
 import numpy as np
 import multiprocessing
-import zipfile
+# import zipfile
 
 from .helpers import *
 from .deepmask import *
