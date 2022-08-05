@@ -1,11 +1,11 @@
 import os, random, string
-import ants
+from ants import apply_ants_transform_to_image, image_write, read_transform
 from collections import Counter
 
 
 def write_nifti(input, id, output_dir, type):
     output_fname = os.path.join(output_dir, id + "_" + type + ".nii.gz")
-    ants.image_write(input, output_fname)
+    image_write(input, output_fname)
 
 
 def find_logger_basefilename(logger):
@@ -21,3 +21,11 @@ def random_case_id():
     digits = "".join(random.choices(string.digits, k=16))
     x = letters[:3].lower() + "_" + digits[:4]
     return x
+
+
+def apply_tranform(image_to_xfm, reference_image, transform, invert_xfrm=True):
+    xfrm = read_transform(transform)
+    if invert_xfrm:
+        xfrm = xfrm.invert()
+    image_xfmd = apply_ants_transform_to_image(image=image_to_xfm, reference=reference_image)
+    return image_xfmd
