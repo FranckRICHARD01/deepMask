@@ -106,20 +106,20 @@ class noelImageProcessor:
                 os.makedirs(xfmdir)
             # write forward transforms to xfmdir
             ants.write_transform(
-                self._t1_reg["fwdtransforms"],
+                ants.read_transform(self._t1_reg["fwdtransforms"][0]),
                 os.path.join(xfmdir, self._id + "_t1_to_tal.mat"),
             )
             ants.write_transform(
-                self._t2_reg["fwdtransforms"],
+                ants.read_transform(self._t2_reg["fwdtransforms"][0]),
                 os.path.join(xfmdir, self._id + "_t2_to_t1-tal.mat"),
             )
             # write inverse transforms to xfmdir
             ants.write_transform(
-                self._t1_reg["invtransforms"],
+                ants.read_transform(self._t1_reg["invtransforms"][0]),
                 os.path.join(xfmdir, self._id + "_t1-tal_to_t1.mat"),
             )
             ants.write_transform(
-                self._t2_reg["invtransforms"],
+                ants.read_transform(self._t2_reg["invtransforms"][0]),
                 os.path.join(xfmdir, self._id + "_t2-tal_to_t2.mat"),
             )
 
