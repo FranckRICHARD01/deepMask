@@ -112,16 +112,6 @@ class noelImageProcessor:
                 ants.read_transform(self._t2_reg["fwdtransforms"][0]),
                 os.path.join(xfmdir, self._id + "_t2_to_t1-tal.mat"),
             )
-            # write inverse transforms to xfmdir
-            ants.write_transform(
-                ants.read_transform(self._t1_reg["invtransforms"][0]),
-                os.path.join(xfmdir, self._id + "_t1-tal_to_t1.mat"),
-            )
-            ants.write_transform(
-                ants.read_transform(self._t2_reg["invtransforms"][0]),
-                os.path.join(xfmdir, self._id + "_t2-tal_to_t2.mat"),
-            )
-
             # self._t2_reg = ants.apply_transforms(fixed = self._t1_reg['warpedmovout'], moving = self._t2, transformlist = self._t1_reg['fwdtransforms'])
             # ants.image_write( self._t1_reg['warpedmovout'], self._t1regfile)
             # ants.image_write( self._t2_reg, self._t2regfile)
