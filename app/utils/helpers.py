@@ -26,5 +26,7 @@ def apply_tranform(image_to_xfm, reference_image, transform, invert_xfrm=True):
     xfrm = read_transform(transform)
     if invert_xfrm:
         xfrm = xfrm.invert()
-    image_xfmd = apply_ants_transform_to_image(image=image_to_xfm, reference=reference_image)
+    image_xfmd = apply_ants_transform_to_image(
+        image=image_to_xfm, reference=reference_image, transform=xfrm
+    )
     return image_xfmd
