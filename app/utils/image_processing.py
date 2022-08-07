@@ -202,6 +202,17 @@ class noelImageProcessor:
                 ants.image_write(self._t1 * self._mask, self._t1brainfile)
                 ants.image_write(self._t2 * self._mask, self._t2brainfile)
 
+    def __apply_transforms(self):
+        logger.info("apply transforms to project outputs back to the native input space")
+        print("apply transforms to project outputs back to the native input space")
+        self._t1_native = apply_tranform(self._mask, self._t1, self._t1_reg["fwdtransforms"][0], invert_xfrm=True)
+        self._t2_native = apply_tranform(self._mask, self._t2, self._t2_reg["fwdtransforms"][0], invert_xfrm=True)
+
+        mask_suffix = "_brain_mask_native.nii.gz"
+        # write skill-stripped versions of the brain mask in native space of the input images
+        ants.image_write(self._t1_native, self._t1brainfile.replace(self._outsuffix, mask_suffix))
+        ants.image_write(self._t2_native, self._t2brainfile.replace(self._outsuffix, mask_suffix))
+
     def __generate_QC_maps(self):
         logger.info("generating QC report")
         qcdir = os.path.join(self._args.tmpdir, "qc")
@@ -346,6 +357,8 @@ class noelImageProcessor:
                 "Skipping image preprocessing, presumably images are co-registered and bias-corrected"
             )
             self.__deepMask_skull_stripping()
+
+        self.__apply_transforms()
 
         if self._QC:
             self.__generate_QC_maps()
