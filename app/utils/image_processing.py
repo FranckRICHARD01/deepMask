@@ -1,19 +1,19 @@
-import os, time, logging
-
-# read pngs to save as pdf
-from PIL import Image
-
+import ants
+import os
+import logging
+import time
 # import matplotlib as mpl
 # mpl.use("Qt5Agg")
-from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-import ants
-import numpy as np
 import multiprocessing
+import numpy as np
 # import zipfile
 
-from .helpers import *
 from .deepmask import *
+from .helpers import *
+from matplotlib.backends.backend_pdf import PdfPages
+# read pngs to save as pdf
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

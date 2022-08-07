@@ -3,11 +3,13 @@
 import os
 import sys
 import torch
+import vnet
+
 from mo_dots import Data
 from utils.data import *
 from utils.deepmask import *
 from utils.image_processing import noelImageProcessor
-import vnet
+
 
 # configuration
 args = Data()

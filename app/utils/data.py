@@ -1,14 +1,13 @@
-from __future__ import print_function, division
 import os
+import numpy as np
 import torch
+import warnings
+
 from nibabel import load as load_nii
 from skimage import transform as skt
-import numpy as np
 from torch.utils.data import Dataset
 
 # ignore warnings
-import warnings
-
 warnings.filterwarnings("ignore")
 
 

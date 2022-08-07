@@ -1,15 +1,16 @@
+import fileinput
+import nibabel as nib
+import numpy as np
 import os
 import re
-import fileinput
-import time
 import subprocess
-import numpy as np
-from sklearn.utils import class_weight
-import nibabel as nib
-from nibabel import load as load_nii
+import time
 import torch
-from torch.autograd import Variable
+
+from nibabel import load as load_nii
 from skimage import transform as skt
+from sklearn.utils import class_weight
+from torch.autograd import Variable
 
 
 def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
@@ -83,8 +84,12 @@ def deepMask(args, model, id, t1w_np, t2w_np, t1w_fname, t2w_fname, nifti=True):
 
 
 def normalize_resize_to_tensor(t1w_np, t2w_np, args):
-    t1w_np = (t1w_np.astype(dtype=np.float32) - t1w_np[np.nonzero(t1w_np)].mean()) / t1w_np[np.nonzero(t1w_np)].std()
-    t2w_np = (t2w_np.astype(dtype=np.float32) - t2w_np[np.nonzero(t2w_np)].mean()) / t2w_np[np.nonzero(t2w_np)].std()
+    t1w_np = (
+        t1w_np.astype(dtype=np.float32) - t1w_np[np.nonzero(t1w_np)].mean()
+    ) / t1w_np[np.nonzero(t1w_np)].std()
+    t2w_np = (
+        t2w_np.astype(dtype=np.float32) - t2w_np[np.nonzero(t2w_np)].mean()
+    ) / t2w_np[np.nonzero(t2w_np)].std()
     t1w_np = skt.resize(t1w_np, args.resize, mode="constant", preserve_range=1)
     t2w_np = skt.resize(t2w_np, args.resize, mode="constant", preserve_range=1)
     data = torch.unsqueeze(torch.from_numpy(np.stack((t1w_np, t2w_np), axis=0)), 0)
