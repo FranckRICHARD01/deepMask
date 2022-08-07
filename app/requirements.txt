@@ -1,9 +1,13 @@
+antspynet
 antspyx
 matplotlib
 mo-dots
 nibabel
+psutil
 scikit-image
 scikit-learn
 scipy
 setproctitle
+torch
 torchsummary
+torchvision
