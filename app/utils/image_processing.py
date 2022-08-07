@@ -9,6 +9,7 @@ import multiprocessing
 import numpy as np
 # import zipfile
 
+from antspynet.utilities import brain_extraction
 from .deepmask import *
 from .helpers import *
 from matplotlib.backends.backend_pdf import PdfPages
@@ -165,53 +166,103 @@ class noelImageProcessor:
             ants.image_write(self._t1_n4, self._t1regfile)
             ants.image_write(self._t2_n4, self._t2regfile)
 
-    def __deepMask_skull_stripping(self):
-        logger.info("performing brain extraction using deepMask")
-        print("performing brain extraction using deepMask")
-        if self._t1file != None and self._t2file != None:
-            self._t1brainfile = os.path.join(
-                self._outputdir, self._id + "_t1" + self._outsuffix
-            )
-            self._t2brainfile = os.path.join(
-                self._outputdir, self._id + "_t2" + self._outsuffix
-            )
+    def __skull_stripping(self):
+        # specify the output filenames for brain extracted images
+        self._t1brainfile = os.path.join(
+            self._outputdir, self._id + "_t1" + self._outsuffix
+        )
+        self._t2brainfile = os.path.join(
+            self._outputdir, self._id + "_t2" + self._outsuffix
+        )
+        if os.environ.get("BRAIN_MASKING") == "cpu":
+            logger.info("performing brain extraction using ANTsPyNet")
+            print("performing brain extraction using ANTsPyNet")
             if self._preprocess:
-                mask = deepMask(
-                    self._args,
-                    self._model,
-                    self._id,
-                    self._t1_n4.numpy(),
-                    self._t2_n4.numpy(),
-                    self._t1regfile,
-                    self._t2regfile,
+                prob = brain_extraction(self._t1_n4, modality="t1")
+                # mask can be obtained as:
+                mask = ants.threshold_image(
+                    prob,
+                    low_thresh=0.6,
+                    high_thresh=1.0,
+                    inval=1,
+                    outval=0,
+                    binary=True,
                 )
-                self._mask = self._t1_n4.new_image_like(mask)
+                self._mask = self._t1_n4.new_image_like(mask.numpy())
                 ants.image_write(self._t1_n4 * self._mask, self._t1brainfile)
                 ants.image_write(self._t2_n4 * self._mask, self._t2brainfile)
             else:
-                mask = deepMask(
-                    self._args,
-                    self._model,
-                    self._id,
-                    self._t1.numpy(),
-                    self._t2.numpy(),
-                    self._t1file,
-                    self._t2file,
+                prob = brain_extraction(self._t1, modality="t1")
+                # mask can be obtained as:
+                mask = ants.threshold_image(
+                    prob,
+                    low_thresh=0.6,
+                    high_thresh=1.0,
+                    inval=1,
+                    outval=0,
+                    binary=True,
                 )
-                self._mask = self._t1.new_image_like(mask)
-                ants.image_write(self._t1 * self._mask, self._t1brainfile)
-                ants.image_write(self._t2 * self._mask, self._t2brainfile)
+                self._mask = self._t1.new_image_like(mask.numpy())
+                # extract the brain and normalize between 0 and 100
+                ants.image_write(
+                    ants.iMath(self._t1 * self._mask, "Normalize") * 100,
+                    self._t1brainfile,
+                )
+                ants.image_write(
+                    ants.iMath(self._t2 * self._mask, "Normalize") * 100,
+                    self._t2brainfile,
+                )
+        else:
+            logger.info("performing brain extraction using deepMask")
+            print("performing brain extraction using deepMask")
+            if self._t1file != None and self._t2file != None:
+                if self._preprocess:
+                    mask = deepMask(
+                        self._args,
+                        self._model,
+                        self._id,
+                        self._t1_n4.numpy(),
+                        self._t2_n4.numpy(),
+                        self._t1regfile,
+                        self._t2regfile,
+                    )
+                    self._mask = self._t1_n4.new_image_like(mask)
+                    ants.image_write(self._t1_n4 * self._mask, self._t1brainfile)
+                    ants.image_write(self._t2_n4 * self._mask, self._t2brainfile)
+                else:
+                    mask = deepMask(
+                        self._args,
+                        self._model,
+                        self._id,
+                        self._t1.numpy(),
+                        self._t2.numpy(),
+                        self._t1file,
+                        self._t2file,
+                    )
+                    self._mask = self._t1.new_image_like(mask)
+                    ants.image_write(self._t1 * self._mask, self._t1brainfile)
+                    ants.image_write(self._t2 * self._mask, self._t2brainfile)
 
     def __apply_transforms(self):
-        logger.info("apply transforms to project outputs back to the native input space")
+        logger.info(
+            "apply transforms to project outputs back to the native input space"
+        )
         print("apply transforms to project outputs back to the native input space")
-        self._t1_native = apply_tranform(self._mask, self._t1, self._t1_reg["fwdtransforms"][0], invert_xfrm=True)
-        self._t2_native = apply_tranform(self._mask, self._t2, self._t2_reg["fwdtransforms"][0], invert_xfrm=True)
+        self._t1_native = apply_tranform(
+            self._mask, self._t1, self._t1_reg["fwdtransforms"][0], invert_xfrm=True
+        )
+        self._t2_native = apply_tranform(
+            self._mask, self._t2, self._t2_reg["fwdtransforms"][0], invert_xfrm=True
+        )
 
         mask_suffix = "_brain_mask_native.nii.gz"
-        # write skill-stripped versions of the brain mask in native space of the input images
-        ants.image_write(self._t1_native, self._t1brainfile.replace(self._outsuffix, mask_suffix))
-        ants.image_write(self._t2_native, self._t2brainfile.replace(self._outsuffix, mask_suffix))
+        # write skull-stripped versions of the brain mask in native space
+        ants.image_write(
+            self._t1_native, self._t1brainfile.replace(self._outsuffix, mask_suffix)
+        )
+        ants.image_write(
+            self._t2_native, self._t2brainfile.replace(self._outsuffix, mask_suffix)
+        )
 
     def __generate_QC_maps(self):
         logger.info("generating QC report")
@@ -329,7 +380,11 @@ class noelImageProcessor:
         logger.info("moving intermediate files to args.tmpdir, reorganizing the rest")
         print("moving intermediate files to args.tmpdir, reorganizing the rest")
 
-        _move_suffix = {"_denseCrf3dProbMapClass1.nii.gz", "_denseCrf3dProbMapClass0.nii.gz", "_vnet_maskpred.nii.gz"}
+        _move_suffix = {
+            "_denseCrf3dProbMapClass1.nii.gz",
+            "_denseCrf3dProbMapClass0.nii.gz",
+            "_vnet_maskpred.nii.gz",
+        }
         _rename_suffix = "_denseCrf3dSegmMap.nii.gz"
         # _final_suffix = "_final.nii.gz"
         _native_suffix = "_native.nii.gz"
@@ -337,7 +392,10 @@ class noelImageProcessor:
         for file in os.listdir(self._outputdir):
             if file.endswith(_rename_suffix):
                 src = os.path.join(self._outputdir, file)
-                dst = os.path.join(self._outputdir, file.replace(_rename_suffix, "_brain_mask_final.nii.gz"))
+                dst = os.path.join(
+                    self._outputdir,
+                    file.replace(_rename_suffix, "_brain_mask_final.nii.gz"),
+                )
                 os.renames(src, dst)
             if file.endswith(_native_suffix):
                 src = os.path.join(self._outputdir, file)
@@ -379,12 +437,12 @@ class noelImageProcessor:
         if self._preprocess:
             self.__register_to_MNI_space()
             self.__bias_correction()
-            self.__deepMask_skull_stripping()
+            self.__skull_stripping()
         else:
             print(
                 "Skipping image preprocessing, presumably images are co-registered and bias-corrected"
             )
-            self.__deepMask_skull_stripping()
+            self.__skull_stripping()
 
         self.__apply_transforms()
 
