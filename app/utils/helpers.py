@@ -27,6 +27,9 @@ def apply_tranform(image_to_xfm, reference_image, transform, invert_xfrm=True):
     if invert_xfrm:
         xfrm = xfrm.invert()
     image_xfmd = apply_ants_transform_to_image(
-        image=image_to_xfm, reference=reference_image, transform=xfrm
+        image=image_to_xfm,
+        reference=reference_image,
+        transform=xfrm,
+        interpolation="nearestneighbor",
     )
     return image_xfmd
