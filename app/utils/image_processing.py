@@ -325,6 +325,34 @@ class noelImageProcessor:
                         plt.close()
                         os.remove(os.path.join(qcdir, i))
 
+    def __organize_and_cleanup(self):
+        logger.info("moving intermediate files to args.tmpdir, reorganizing the rest")
+        print("moving intermediate files to args.tmpdir, reorganizing the rest")
+
+        _move_suffix = {"_denseCrf3dProbMapClass1.nii.gz", "_denseCrf3dProbMapClass0.nii.gz", "_vnet_maskpred.nii.gz"}
+        _rename_suffix = "_denseCrf3dSegmMap.nii.gz"
+        # _final_suffix = "_final.nii.gz"
+        _native_suffix = "_native.nii.gz"
+
+        for file in os.listdir(self._outputdir):
+            if file.endswith(_rename_suffix):
+                src = os.path.join(self._outputdir, file)
+                dst = os.path.join(self._outputdir, file.replace(_rename_suffix, "_brain_mask_final.nii.gz"))
+                os.renames(src, dst)
+            if file.endswith(_native_suffix):
+                src = os.path.join(self._outputdir, file)
+                dst = os.path.join(self._outputdir, "native", file)
+                os.renames(src, dst)
+            # if file.endswith(_final_suffix):
+            #     src = os.path.join(self._outputdir, file)
+            #     dst = os.path.join(self._outputdir, "final", file)
+            #     os.renames(src, dst)
+            for _suffix in _move_suffix:
+                if file.endswith(_suffix):
+                    src = os.path.join(self._outputdir, file)
+                    dst = os.path.join(self._args.tmpdir, "deepMask", file)
+                    os.renames(src, dst)
+
     # def __create_zip_archive(self):
     #     print("creating a zip archive")
     #     logger.info("creating a zip archive")
@@ -363,6 +391,8 @@ class noelImageProcessor:
         if self._QC:
             self.__generate_QC_maps()
         # self.__create_zip_archive()
+
+        self.__organize_and_cleanup()
         end = time.time()
         print(
             "pipeline processing time elapsed: {} seconds".format(
