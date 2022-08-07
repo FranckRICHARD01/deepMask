@@ -36,16 +36,20 @@ class InferMaskDataset(Dataset):
     def __len__(self):
         return int(1)
 
+    def normalize(image):
+        normalized_image = (
+        image.astype(dtype=np.float32) - image[np.nonzero(image)].mean()
+        ) / image[np.nonzero(image)].std()
+        return normalized_image
+
     def __getitem__(self, idx):
         t1w_fname = os.path.join(self.root_dir, self.t1)
         t2w_fname = os.path.join(self.root_dir, self.t2)
-        case_id = self.id
 
         t1w, t2w = load_nii(t1w_fname).get_fdata(), load_nii(t2w_fname).get_fdata()
-        t1w = (t1w.astype(dtype=np.float32) - t1w[np.nonzero(t1w)].mean()) / t1w[np.nonzero(t1w)].std()
-        t2w = (t2w.astype(dtype=np.float32) - t2w[np.nonzero(t2w)].mean()) / t2w[np.nonzero(t2w)].std()
+        t1w, t2w = normalize(t1w), normalize(t2w)
 
-        sample = {"t1w": t1w, "t2w": t2w, "filename": t1w_fname, "id": case_id}
+        sample = {"t1w": t1w, "t2w": t2w, "filename": t1w_fname, "id": self.id}
 
         if self.transform:
             sample = self.transform(sample)
