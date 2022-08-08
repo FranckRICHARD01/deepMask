@@ -101,7 +101,7 @@ class noelImageProcessor:
                 type_of_transform=self._transform,
             )
             # create directory to store transforms
-            xfmdir = os.path.join(self._args.tmpdir, "xfms")
+            xfmdir = os.path.join(self._outputdir, "transforms")
             if not os.path.exists(xfmdir):
                 os.makedirs(xfmdir)
             # write forward transforms to xfmdir
