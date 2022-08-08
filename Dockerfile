@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 as builder
 LABEL maintainer="Ravnoor Singh Gill <ravnoor@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y \
@@ -6,29 +6,18 @@ RUN apt-get update && apt-get upgrade -y \
                         bash \
                         wget \
                         bzip2 \
-                        sudo \
-    && sudo apt-get clean \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-ENV PATH=/home/user/conda/bin:${PATH}
 
 # create a working directory
 RUN mkdir /app
 WORKDIR /app
 
-# create a non-root user and switch to it
-RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
- && chown -R user:user /app
-RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-user
-USER user
-
-# all users can use /home/user as their home directory
-ENV HOME=/home/user
-RUN chmod 777 /home/user
-
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh \
-    && /bin/bash Miniconda3-py37_4.9.2-Linux-x86_64.sh -b -p /home/user/conda \
+    && /bin/bash Miniconda3-py37_4.9.2-Linux-x86_64.sh -b -p /opt/conda \
     && rm Miniconda3-py37_4.9.2-Linux-x86_64.sh
+
+ENV PATH=/opt/conda/bin:$PATH
 
 RUN conda install --yes cmake \
     && conda clean -ya
@@ -36,10 +25,22 @@ RUN conda install --yes cmake \
 COPY app/requirements.txt /app/requirements.txt
 
 RUN pip install -r /app/requirements.txt \
-    && rm -rf /home/user/.cache
+    && rm -rf /root/.cache
+
+
+# production image
+FROM ubuntu:18.04
+
+ENV TZ=America/Montreal
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+COPY --from=builder /opt/conda /opt/conda
+
+ENV PATH=/opt/conda/bin:$PATH
 
 COPY app/ /app/
 
-RUN sudo chmod -R 777 /app && sudo chmod +x /app/inference.py
+RUN chmod -R 777 /app && chmod +x /app/inference.py
 
 CMD ["python3"]
