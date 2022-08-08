@@ -149,4 +149,7 @@ dmypy.json
 # profiling data
 .prof
 
+# misc tests
+test.sh
+
 # End of https://www.toptal.com/developers/gitignore/api/python
