@@ -30,7 +30,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux
     && /bin/bash Miniconda3-py37_4.9.2-Linux-x86_64.sh -b -p /home/user/conda \
     && rm Miniconda3-py37_4.9.2-Linux-x86_64.sh
 
-RUN conda install --yes pytorch torchvision cpuonly -c pytorch \
+RUN conda install --yes cmake pytorch torchvision cpuonly -c pytorch \
     && conda clean -ya
 
 COPY app/requirements.txt /app/requirements.txt

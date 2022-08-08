@@ -26,14 +26,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.12
-        with:
-          cmake-version: '3.24.x'
-
-      - name: Use cmake
-        run: cmake --version
-
       - name: Run tests
         run: |
           if [ -f docker-compose.test.yml ]; then
@@ -54,14 +46,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.12
-        with:
-          cmake-version: '3.24.x'
-
-      - name: Use cmake
-        run: cmake --version
 
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
