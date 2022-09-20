@@ -438,13 +438,12 @@ class noelImageProcessor:
             self.__register_to_MNI_space()
             self.__bias_correction()
             self.__skull_stripping()
+            self.__apply_transforms()
         else:
             print(
                 "Skipping image preprocessing, presumably images are co-registered and bias-corrected"
             )
             self.__skull_stripping()
-
-        self.__apply_transforms()
 
         if self._QC:
             self.__generate_QC_maps()
