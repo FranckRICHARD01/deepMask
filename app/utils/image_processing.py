@@ -248,10 +248,10 @@ class noelImageProcessor:
             "apply transforms to project outputs back to the native input space"
         )
         print("apply transforms to project outputs back to the native input space")
-        self._t1_native = apply_tranform(
+        self._t1_native = apply_transform(
             self._mask, self._t1, self._t1_reg["fwdtransforms"][0], invert_xfrm=True
         )
-        self._t2_native = apply_tranform(
+        self._t2_native = apply_transform(
             self._mask, self._t2, self._t2_reg["fwdtransforms"][0], invert_xfrm=True
         )
 

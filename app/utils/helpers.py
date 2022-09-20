@@ -22,7 +22,7 @@ def random_case_id():
     return x
 
 
-def apply_tranform(image_to_xfm, reference_image, transform, invert_xfrm=True):
+def apply_transform(image_to_xfm, reference_image, transform, invert_xfrm=True):
     xfrm = read_transform(transform)
     if invert_xfrm:
         xfrm = xfrm.invert()
