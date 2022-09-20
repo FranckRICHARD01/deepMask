@@ -150,6 +150,6 @@ dmypy.json
 .prof
 
 # misc tests
-test.sh
+Makefile
 
 # End of https://www.toptal.com/developers/gitignore/api/python
