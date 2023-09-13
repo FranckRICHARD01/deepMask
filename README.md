@@ -4,9 +4,9 @@
 
 <p align="center">
       <a href="https://www.python.org/">
-        <img src="https://img.shields.io/badge/Python-3.7-ff69b4.svg" /></a>
+        <img src="https://img.shields.io/badge/Python-3.7+-ff69b4.svg" /></a>
       <a href= "https://pytorch.org/">
-        <img src="https://img.shields.io/badge/PyTorch-1.7-2BAF2B.svg" /></a>
+        <img src="https://img.shields.io/badge/PyTorch-1.8%20LTS-2BAF2B.svg" /></a>
       <a href= "https://github.com/NOEL-MNI/deepMask/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
       <a href="https://doi.org/10.5281/zenodo.4521706">
@@ -41,11 +41,11 @@ Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). [V-net: Fully convolu
 ```
 
 ## Pre-requisites
-###TODO: Update version requirements
 ```console
-1. Python >= 3.5
-2. Pytorch >= 1.0.0
-3. Nibabel >= 1.14.0
+1. Python >= 3.7
+2. PyTorch (LTS) <= 1.8.2
+3. ANTsPy
+4. ANTsPyNet
 ```
 
 ## Installation
