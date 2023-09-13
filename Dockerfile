@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 as builder
+FROM ubuntu:20.04 as builder
 LABEL maintainer="Ravnoor Singh Gill <ravnoor@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y \
@@ -13,9 +13,9 @@ RUN apt-get update && apt-get upgrade -y \
 RUN mkdir /app
 WORKDIR /app
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_23.1.0-1-Linux-x86_64.sh \
-    && /bin/bash Miniconda3-py37_23.1.0-1-Linux-x86_64.sh -b -p /opt/conda \
-    && rm Miniconda3-py37_23.1.0-1-Linux-x86_64.sh
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_23.5.2-0-Linux-x86_64.sh \
+    && /bin/bash Miniconda3-py38_23.5.2-0-Linux-x86_64.sh -b -p /opt/conda \
+    && rm Miniconda3-py38_23.5.2-0-Linux-x86_64.sh
 
 ENV PATH=/opt/conda/bin:$PATH
 
@@ -28,7 +28,7 @@ RUN pip install -r /app/requirements.txt
 
 
 # production image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV TZ=America/Montreal
 
