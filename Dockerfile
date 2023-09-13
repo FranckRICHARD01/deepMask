@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 as builder
+FROM ubuntu:20.04 as builder
 LABEL maintainer="Ravnoor Singh Gill <ravnoor@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y \
@@ -28,7 +28,7 @@ RUN pip install -r /app/requirements.txt
 
 
 # production image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV TZ=America/Montreal
 
