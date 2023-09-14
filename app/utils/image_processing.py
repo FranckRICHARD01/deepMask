@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import multiprocessing
 import numpy as np
 # import zipfile
-
-from antspynet.utilities import brain_extraction
+if os.environ.get("BRAIN_MASKING") == "cpu":
+    from antspynet.utilities import brain_extraction
 from .deepmask import *
 from .helpers import *
 from matplotlib.backends.backend_pdf import PdfPages
