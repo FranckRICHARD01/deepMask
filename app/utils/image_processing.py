@@ -15,6 +15,7 @@ from .helpers import *
 from matplotlib.backends.backend_pdf import PdfPages
 # read pngs to save as pdf
 from PIL import Image
+from antspynet.utilities import brain_extraction
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
